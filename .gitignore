@@ -1,0 +1,9 @@
+data/
+data*/
+sample_data/
+tmp_*/
+__pycache__/
+*.py[cod]
+.venv/
+.DS_Store
+*.log
