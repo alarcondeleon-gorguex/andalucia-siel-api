@@ -1,202 +1,228 @@
-# Andalusia SIEL Election Results Downloader
+# Resultados electorales de Andalucía — API SIEL
 
-Reproducible downloader for the election results displayed by
-<https://resultadoseleccionesandalucia.es/>.
+Descargador reproducible de los resultados de las **elecciones al Parlamento de
+Andalucía** que muestra [resultadoseleccionesandalucia.es](https://resultadoseleccionesandalucia.es/).
+Consulta la API pública SIEL de la **Junta de Andalucía**, conserva sus respuestas
+originales y genera CSV. No utiliza scraping de las tablas de la web.
 
-The website does not expose static CSV files in its HTML. Its tables are powered
-by the public SIEL API from the Regional Government of Andalusia:
+- API: <https://ws040.juntadeandalucia.es/siel-api>
+- Swagger: <https://ws040.juntadeandalucia.es/siel-api/swagger-ui.html>
+- Especificación: <https://ws040.juntadeandalucia.es/siel-api/api-docs>
 
-- API base: <https://ws040.juntadeandalucia.es/siel-api>
-- Swagger UI: <https://ws040.juntadeandalucia.es/siel-api/swagger-ui.html>
-- OpenAPI/Swagger JSON: <https://ws040.juntadeandalucia.es/siel-api/api-docs>
+## Instalación
 
-This project queries that API directly, stores the raw JSON responses as NDJSON,
-and generates normalized CSV files. The main output is one complete CSV per
-Andalusian regional election, with one row per polling-station table plus one
-CERA/absentee-vote row per province when available.
+Python **3.11 o posterior**:
 
-## What You Get
-
-For each election date, the downloader can generate:
-
-- `processed/andalucia_<election>_completo.csv`: recommended final dataset.
-  It contains ordinary polling-station tables and provincial CERA rows, with
-  turnout, abstention, blank votes, invalid votes, valid votes, and party votes
-  in columns.
-- `processed/mesas_<election>_catalog.csv`: polling-station table catalog.
-- `processed/mesas_<election>_long.csv`: one row per table and party.
-- `processed/mesas_<election>_wide.csv`: one row per table, parties in columns.
-- `processed/mesas_<election>_incidencias.csv`: tables with API warnings or
-  download incidents.
-- `processed/rausentes_<election>_long.csv`: CERA/absentee results by party.
-- `processed/rausentes_<election>_wide.csv`: CERA/absentee results in wide form.
-- `raw/*.ndjson`: raw API responses preserved before normalization.
-- `manifest_<election>.json`: source URLs, timestamps, counts, and file paths.
-
-The complete CSV intentionally excludes the autonomous-wide CERA row because it
-duplicates the sum of the eight provincial CERA rows. The autonomous CERA raw
-record is still preserved in `raw/rausentes_<election>.ndjson`.
-
-## Quick Start
-
-Install dependencies:
-
-```bash
+```sh
 python3 -m pip install -r requirements.txt
 ```
 
-List available Andalusian regional elections:
+## Comprobar disponibilidad sin descargar todas las mesas
 
-```bash
+Listar convocatorias:
+
+```sh
 python3 scripts/download_mesas.py --list-convocatorias
 ```
 
-Download every available election into a separate output directory:
+Comprobar todas las convocatorias con una muestra pequeña:
 
-```bash
-python3 scripts/download_mesas.py --all --workers 48 --output ./datasets
+```sh
+python3 scripts/download_mesas.py --check --all --retries 0 --output ./comprobacion
 ```
 
-If the process is interrupted, resume it without redownloading completed tables:
+Comprobar únicamente 2026:
 
-```bash
-python3 scripts/download_mesas.py --all --workers 48 --resume --output ./datasets
+```sh
+python3 scripts/download_mesas.py --check --convocatoria 202605 --output ./comprobacion-2026
 ```
 
-The final CSV files will be in:
+`--check` consulta resúmenes y escrutinios de Andalucía y sus ocho provincias,
+los mismos agregados CERA y **como máximo una mesa por provincia y convocatoria**.
+No enumera el catálogo completo de mesas. Para buscar cada mesa explora como
+máximo cinco municipios y una rama de distrito/sección por municipio. Tiene un
+límite de 1.600 consultas lógicas de comprobación, además del descubrimiento
+inicial de convocatorias; los reintentos HTTP de cada
+consulta se controlan con `--retries`. Si se alcanza el límite, el informe marca
+los ámbitos que no se pudieron comprobar.
 
-```bash
-./datasets/processed/andalucia_*_completo.csv
+El informe `check_siel.json` incluye respuestas, URLs, parámetros, incidencias,
+selecciones sin distritos históricos y conciliaciones provinciales. Una muestra
+satisfactoria **no acredita que todas las mesas sean correctas o estén disponibles**.
+El comando devuelve 1 si encuentra incidencias o no puede completar alguna
+comprobación. El HTTP 500 conocido del CERA de 1982 queda identificado en el
+informe, sin provocar por sí solo un código de error. Un error general de conexión
+antes de obtener el catálogo puede impedir crear el informe.
+
+Las convocatorias se descubren automáticamente: no hay que añadir cada elección
+al código. El 18 de octubre de 2026 estaban disponibles 13, de `198205` a `202605`.
+
+## Descargar resultados
+
+Prueba mínima de una mesa, con raw comprimido y archivos identificados como
+parciales:
+
+```sh
+python3 scripts/download_mesas.py --convocatoria 202605 --limit-mesas 1 --compress-raw --output ./prueba
 ```
 
-To download a single election:
+Una convocatoria completa:
 
-```bash
-python3 scripts/download_mesas.py --convocatoria 202206 --workers 48 --output data
+```sh
+python3 scripts/download_mesas.py --convocatoria 202605 --output ./datasets
 ```
 
-To regenerate only the final CSV from already downloaded raw files:
+Todas las convocatorias (descarga extensa, opcional):
 
-```bash
-python3 scripts/download_mesas.py --convocatoria 202206 --complete-only --output data
+```sh
+python3 scripts/download_mesas.py --all --workers 6 --compress-raw --output ./datasets
 ```
 
-`--complete-only` checks the polling-station catalog when it exists. If the raw
-file is partial, it stops and asks you to resume the download first.
+La API no documenta una descarga masiva de todas las mesas. La descarga completa
+consulta cada mesa y puede requerir bastante tiempo y espacio. El valor
+predeterminado de concurrencia es seis; para comprobar disponibilidad usa `--check`.
 
-## Data Quality Flags
+Los directorios relativos de `--output` se resuelven desde la raíz del repositorio.
+`--compress-raw` utiliza `.ndjson.gz` para nuevos archivos. Al reanudar se detecta y
+conserva automáticamente el formato existente; no se mantienen dos copias del raw.
+Los lectores y la reconstrucción de CSV admiten ambos formatos. No conviertas un
+archivo existente dejando versiones comprimida y sin comprimir en la misma carpeta.
 
-The output CSVs include three control columns:
+## Reanudación y ámbito
 
-- `fuente_registro`: where the row came from, such as `api_mesa`,
-  `api_resumen_mesa`, `api_resumen_mesa_parcial`, `api_cera`, or
-  `catalogo_cera`.
-- `estado_descarga`: download status, such as `ok`, `ok_sin_votos`,
-  `cera_no_disponible`, `escrutinio_no_disponible`, `mesa_no_disponible`, or
-  `error_interno_script`.
-- `error_descarga`: short explanation when the API did not return everything.
-
-Some historical tables exist in the official catalog and return a valid
-`/v1/resumen/mesa` response, but `/v1/escrutinio/ambito/mesa` returns HTTP 500.
-One reproduced case in `198606` is a table with `votostotales=0` and
-`votoscandidatura=0`. In that situation the downloader preserves the official
-summary and marks the row as `ok_sin_votos`.
-
-If a table summary exists but party-level results cannot be obtained and it is
-not a zero-vote case, the row is still kept as `escrutinio_no_disponible`. Party
-columns are left empty rather than silently filled with zeros.
-
-CERA/absentee-vote endpoints are available from `198606` to `202206`. For
-`198205`, the official API currently returns HTTP 500 for CERA endpoints; the
-downloader keeps eight provincial CERA rows marked as `cera_no_disponible`.
-
-## API Flow
-
-The table catalog is built with the same selector chain used by the website:
-
-1. `/v1/opciones/fconvocatoria`
-2. `/v1/opciones/provincia`
-3. `/v1/opciones/municipio`
-4. `/v1/opciones/distrito`
-5. `/v1/opciones/seccion`
-6. `/v1/opciones/mesa`
-
-For each polling-station table:
-
-- `/v1/resumen/mesa`
-- `/v1/escrutinio/ambito/mesa`
-
-For CERA/absentee results:
-
-- `/v1/resumen/rausentes/cautonoma`
-- `/v1/escrutinio/ambito/rausentes/cautonoma`
-- `/v1/resumen/rausentes/provincia`
-- `/v1/escrutinio/ambito/rausentes/provincia`
-
-This avoids visual scraping and keeps the original API payloads available for
-auditing.
-
-## Practical Notes
-
-On some macOS/Python setups, the `ws040.juntadeandalucia.es` certificate chain
-is rejected as self-signed. For that reason, TLS verification is disabled by
-default. If your certificate store accepts the host, enable strict verification:
-
-```bash
-python3 scripts/download_mesas.py --convocatoria 202206 --verify-tls
+```sh
+python3 scripts/download_mesas.py --all --resume --output ./datasets
 ```
 
-The API does not provide a documented bulk endpoint for all polling-station
-tables in one election. The downloader therefore queries table by table, using
-`--workers` for concurrency.
+Los registros ya obtenidos no se vuelven a consultar. Para reintentar también los
+fallidos o incompletos:
 
-## Espanol
-
-Descargador reproducible de los resultados que muestra
-<https://resultadoseleccionesandalucia.es/>.
-
-La web no publica CSV estaticos en el HTML. Sus tablas se alimentan de la API
-SIEL de la Junta de Andalucia. Este proyecto consulta esa API, guarda las
-respuestas originales en NDJSON y genera CSV normalizados.
-
-El CSV principal es:
-
-```bash
-processed/andalucia_<eleccion>_completo.csv
+```sh
+python3 scripts/download_mesas.py --all --resume --retry-failed --output ./datasets
 ```
 
-Incluye una fila por mesa electoral ordinaria y una fila CERA por provincia
-cuando la API la ofrece, con censo, votantes, abstenciones, participacion,
-blancos, nulos, votos validos y votos por partido en columnas.
+Los reintentos reemplazan el registro anterior sin añadir otra fila con su clave.
+Las discrepancias aritméticas de respuestas completas no se reintentan por ser
+incidencias del dato de origen. El CERA no disponible permanece sin nuevas
+consultas salvo que se solicite `--retry-failed` o `--overwrite`.
 
-Para descargar todas las elecciones en tu carpeta de datasets:
+El catálogo conserva metadatos de convocatoria, provincias, límite, finalización
+de enumeración y huella de sus claves en `catalog_scope_<eleccion>.json`. Si se
+quita un límite de prueba o se amplía la selección, el catálogo se vuelve a
+construir. Los catálogos antiguos sin estos metadatos también se actualizan al
+reanudar; esto puede requerir volver a enumerar, pero conserva las mesas válidas.
 
-```bash
-cd andalucia-siel-api
-python3 scripts/download_mesas.py --all --workers 48 --output ./datasets
+Para reducir el ámbito utiliza otra carpeta: se rechaza una reanudación cuyo raw
+contenga registros fuera de la selección solicitada. `--province 18`, por ejemplo,
+selecciona Granada. Una línea NDJSON dañada o una clave duplicada provocan un error
+explícito; el programa no descarta silenciosamente esos datos.
+
+## Archivos y cobertura
+
+- `raw/mesas_<eleccion>.ndjson[.gz]`: respuestas originales de mesas y contexto.
+- `raw/rausentes_<eleccion>.ndjson[.gz]`: CERA agregado para Andalucía y provincias.
+- `processed/mesas_<eleccion>_catalog.csv`: catálogo de la selección.
+- `processed/mesas_<eleccion>_long.csv`: una fila por mesa y candidatura disponible.
+- `processed/mesas_<eleccion>_wide.csv`: una fila por mesa y columnas de candidaturas.
+- `processed/andalucia_<eleccion>_completo.csv`: todas las mesas del catálogo
+  enumerado sin filtros ni límite, más ocho registros CERA provinciales.
+- `processed/andalucia_<eleccion>_parcial.csv`: selección limitada, provincial,
+  sin CERA o cuya cobertura total no se puede acreditar con los metadatos.
+- `processed/mesas_<eleccion>_incidencias.csv`: incidencias de descarga o calidad de mesas.
+- `processed/calidad_<eleccion>.csv`: incidencias de calidad de mesas y CERA.
+- `processed/rausentes_<eleccion>_long.csv` y `_wide.csv`: derivados CERA.
+- `manifest_<eleccion>.json`: ámbito, cobertura, estados, recuentos y archivos.
+
+El CSV combinado conserva todas las mesas de la selección y una fila CERA por
+provincia. Excluye la fila CERA agregada de Andalucía para evitar duplicar el voto
+exterior; esa respuesta sí permanece en el raw. Los votos desconocidos quedan
+vacíos. Las columnas de candidaturas se ordenan de forma estable.
+
+El nombre `_completo` describe **cobertura del catálogo**, no certifica la exactitud
+de cada dato de origen. El manifiesto distingue:
+
+- `coverage_complete`: catálogo sin filtros ni límite, ocho provincias y ocho
+  registros provinciales CERA; claves presentes y únicas.
+- `data_complete`: cobertura completa sin registros incompletos.
+- `quality_ok`: no se han detectado datos incompletos ni inconsistencias.
+
+Por tanto, un CSV con cobertura completa puede conservar incidencias y datos
+desconocidos. Consulta siempre el manifiesto y el informe de calidad.
+
+## Calidad del dato
+
+Además de `fuente_registro`, `estado_descarga` y `error_descarga`, los CSV incluyen
+`estado_calidad` (`ok`, `inconsistente` o `incompleto`) e `incidencias_calidad`.
+Se comprueban la identidad territorial y de convocatoria, valores ausentes,
+candidaturas duplicadas y estas igualdades:
+
+```text
+censo = votantes + abstenciones
+votantes = válidos + nulos
+válidos = blancos + candidaturas
+suma de votos de candidaturas = votos a candidaturas
 ```
 
-Si se interrumpe:
+Los valores originales se conservan aunque no cuadren: no se corrigen ni imputan.
+Los nombres y códigos de candidaturas de la API se conservan literalmente.
+El HTTP 200 por sí solo no acredita la calidad de una respuesta.
 
-```bash
-cd andalucia-siel-api
-python3 scripts/download_mesas.py --all --workers 48 --resume --output ./datasets
+La auditoría de octubre de 2026 encontró diferencias en agregados de 1990
+(54 votos), tres mesas muestreadas de 1996 (1, 1 y 190 votos) y agregados de 2018
+(17 votantes frente a válidos+nulos). No es una lista exhaustiva de incidencias.
+El CERA de 1982 devuelve HTTP 500; se conservan filas provinciales con
+`cera_no_disponible` y votos desconocidos vacíos. Si un resumen de mesa acredita
+cero votos y falla el escrutinio, se conserva como `ok_sin_votos`. Si faltan votos
+por candidatura en una mesa no vacía, se marca `escrutinio_no_disponible`.
+
+En 2026, el censo total del SIEL incluye CERA. Para comparar participación con
+otras publicaciones hay que declarar el censo utilizado. Los votos de los
+agregados consultados coincidieron con el BOJA 108/2026 y su corrección del
+BOJA 115/2026; no se ha certificado cada mesa mediante un contraste externo.
+
+## Reconstruir derivados sin consultar la red
+
+```sh
+python3 scripts/download_mesas.py --convocatoria 202605 --complete-only --output ./datasets
 ```
 
-Los CSV finales quedaran en:
+Exige raw y catálogo con claves únicas y exactamente coincidentes, y rechaza
+registros de otras convocatorias, duplicados, ausencias y claves ajenas.
+Los catálogos antiguos sin metadatos de alcance solo permiten una exportación
+identificada como parcial. Para acreditar su ámbito utiliza `--resume`.
+`--complete-only` no admite nuevos filtros ni límites. Con `--skip-rausentes`
+excluye CERA incluso si existe un raw anterior, y la exportación es parcial.
 
-```bash
-./datasets/processed/andalucia_*_completo.csv
+## TLS y reintentos HTTP
+
+La verificación TLS está **activada por defecto**. `--verify-tls` sigue siendo
+válido por compatibilidad. Solo si una instalación necesita desactivarla de forma
+explícita puede utilizar `--insecure`.
+
+El cliente utiliza espera exponencial para errores transitorios y respeta
+`Retry-After` en HTTP 429/503. Los errores HTTP permanentes, como 404, no se
+reintentan. El parámetro `--retries` controla el número de reintentos por consulta.
+
+## Pruebas
+
+Las pruebas no descargan resultados electorales:
+
+```sh
+python3 -m unittest discover -s tests -v
 ```
 
-Columnas de control importantes:
+GitHub Actions ejecuta la suite con Python 3.11 y 3.13.
 
-- `fuente_registro`: origen de la fila.
-- `estado_descarga`: estado de descarga.
-- `error_descarga`: explicacion breve si la API no devolvio algun dato.
+## English
 
-Si la API reconoce una mesa pero no devuelve el escrutinio por partidos, la
-mesa se conserva igualmente y se marca la incidencia. Para mesas con cero votos,
-se conserva el resumen oficial y se marca `ok_sin_votos`. Para CERA en `198205`,
-la API devuelve HTTP 500; se conservan ocho filas provinciales marcadas como
-`cera_no_disponible`.
+Reproducible downloader for **elections to the Parliament of Andalusia**, using
+the public SIEL API provided by the **Junta de Andalucía**. Raw responses are
+preserved as plain or gzip NDJSON, with normalized CSV exports and explicit
+coverage and quality flags.
+
+Use `--check --all` for a bounded availability and consistency check without
+bulk polling-station downloads. Partial selections produce `_parcial.csv`.
+`--resume --retry-failed` retries unsuccessful records without duplicate rows;
+`--complete-only` validates unique identities and catalog coverage before export.
+TLS verification is enabled by default. Source inconsistencies remain visible
+and are never silently repaired.

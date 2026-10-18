@@ -5,6 +5,8 @@ import threading
 import time
 import urllib.parse
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from typing import Any, Mapping
 
 import requests
@@ -37,7 +39,7 @@ class SielClient:
     retries: int = 3
     pause: float = 0.25
     user_agent: str = "andalucia-siel-api-downloader/0.1"
-    verify_tls: bool = False
+    verify_tls: bool = True
     pool_size: int = 32
     _thread_local: threading.local = field(init=False, repr=False, compare=False)
 
@@ -92,9 +94,23 @@ class SielClient:
                 if response is not None:
                     last_status_code = response.status_code
                     last_response_text = response.text[:500]
+                    if response.status_code not in {408, 429, 500, 502, 503, 504}:
+                        break
                 if attempt >= self.retries:
                     break
-                time.sleep(self.pause * (2**attempt))
+                delay = self.pause * (2**attempt)
+                if response is not None and response.status_code in {429, 503}:
+                    retry_after = response.headers.get("Retry-After")
+                    if retry_after:
+                        try:
+                            delay = max(delay, float(retry_after))
+                        except ValueError:
+                            try:
+                                date = parsedate_to_datetime(retry_after)
+                                delay = max(delay, (date - datetime.now(timezone.utc)).total_seconds())
+                            except (ValueError, TypeError, OverflowError):
+                                pass
+                time.sleep(max(0, delay))
 
         detail = f"HTTP {last_status_code}" if last_status_code else str(last_error)
         raise SielApiError(

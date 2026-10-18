@@ -1,0 +1,1536 @@
+[
+  {
+    "case": "199006/cautonoma/ALL/total",
+    "expected": "inconsistente",
+    "record": {
+      "source": {
+        "params": {
+          "cautonoma": 1,
+          "tconvocatoria": 5,
+          "fconvocatoria": 199006
+        }
+      },
+      "estado_descarga": "ok",
+      "resumen": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199006,
+            "valor": "199006"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": null,
+          "municipio": null,
+          "distrito": null,
+          "partido": null,
+          "seccion": null,
+          "mesa": null
+        },
+        "censo": 5007675,
+        "abstenciones": 2236291,
+        "votostotales": 2771384,
+        "votosnulos": 12319,
+        "votosvalidos": 2759065,
+        "votosblanco": 12024,
+        "votoscandidatura": 2747041,
+        "nummesas": 6659
+      },
+      "escrutinio": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199006,
+            "valor": "199006"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": null,
+          "municipio": null,
+          "distrito": null,
+          "partido": null,
+          "seccion": null,
+          "mesa": null
+        },
+        "nombreconjunto": "Formación política",
+        "descripcion": "",
+        "distribucion": "ambito",
+        "votos": [
+          {
+            "conjunto": "PSOE-A - PARTIDO SOCIALISTA OBRERO ESPAÑOL DE ANDALUCIA",
+            "numvotos": 1368576,
+            "diputados": 62,
+            "porcentajeVotos": 49.6
+          },
+          {
+            "conjunto": "PP - PARTIDO POPULAR",
+            "numvotos": 611903,
+            "diputados": 26,
+            "porcentajeVotos": 22.18
+          },
+          {
+            "conjunto": "IU-CA - IZQUIERDA UNIDA-CONVOCATORIA POR ANDALUCIA",
+            "numvotos": 349659,
+            "diputados": 11,
+            "porcentajeVotos": 12.67
+          },
+          {
+            "conjunto": "PA - PARTIDO ANDALUCISTA",
+            "numvotos": 296613,
+            "diputados": 10,
+            "porcentajeVotos": 10.75
+          },
+          {
+            "conjunto": "CDS - CENTRO DEMOCRATICO Y SOCIAL",
+            "numvotos": 32654,
+            "diputados": 0,
+            "porcentajeVotos": 1.18
+          },
+          {
+            "conjunto": "RUIZ-MATEOS - AGRUPACION RUIZ MATEOS",
+            "numvotos": 15637,
+            "diputados": 0,
+            "porcentajeVotos": 0.57
+          },
+          {
+            "conjunto": "PTE-UC - PARTIDO TRABAJADORES DE ESPAÑA-UNIDAD COMUNISTA",
+            "numvotos": 14813,
+            "diputados": 0,
+            "porcentajeVotos": 0.54
+          },
+          {
+            "conjunto": "DS - DEMOCRACIA SOCIALISTA",
+            "numvotos": 14499,
+            "diputados": 0,
+            "porcentajeVotos": 0.53
+          },
+          {
+            "conjunto": "VA - VERDES DE ANDALUCIA",
+            "numvotos": 13979,
+            "diputados": 0,
+            "porcentajeVotos": 0.51
+          },
+          {
+            "conjunto": "LVE - LOS VERDES ECOLOGISTAS",
+            "numvotos": 12651,
+            "diputados": 0,
+            "porcentajeVotos": 0.46
+          },
+          {
+            "conjunto": "PCPA - PARTIDO COMUNISTA DEL PUEBLO ANDALUZ",
+            "numvotos": 6300,
+            "diputados": 0,
+            "porcentajeVotos": 0.23
+          },
+          {
+            "conjunto": "PCE-(M.L.) - PARTIDO COMUNISTA DE ESPAÑA (MARXISTA-LENINISTA)",
+            "numvotos": 2401,
+            "diputados": 0,
+            "porcentajeVotos": 0.09
+          },
+          {
+            "conjunto": "FE-JONS - FALANGE ESPAÑOLA DE LAS J.O.N.S.",
+            "numvotos": 2312,
+            "diputados": 0,
+            "porcentajeVotos": 0.08
+          },
+          {
+            "conjunto": "PH - PARTIDO HUMANISTA",
+            "numvotos": 1869,
+            "diputados": 0,
+            "porcentajeVotos": 0.07
+          },
+          {
+            "conjunto": "FAL - FRENTE ANDALUZ DE LIBERACION",
+            "numvotos": 1633,
+            "diputados": 0,
+            "porcentajeVotos": 0.06
+          },
+          {
+            "conjunto": "AR - COALICION ALIANZA POR LA REPUBLICA",
+            "numvotos": 698,
+            "diputados": 0,
+            "porcentajeVotos": 0.03
+          },
+          {
+            "conjunto": "MFE - MOVIMIENTO FALANGISTA DE ESPAÑA",
+            "numvotos": 560,
+            "diputados": 0,
+            "porcentajeVotos": 0.02
+          },
+          {
+            "conjunto": "PED - UNIDAD CENTRISTA ANDALUZA",
+            "numvotos": 230,
+            "diputados": 0,
+            "porcentajeVotos": 0.01
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "199006/provincia/41/total",
+    "expected": "inconsistente",
+    "record": {
+      "source": {
+        "params": {
+          "cautonoma": 1,
+          "tconvocatoria": 5,
+          "fconvocatoria": 199006,
+          "provincia": 41
+        }
+      },
+      "estado_descarga": "ok",
+      "resumen": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199006,
+            "valor": "199006"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 41,
+            "valor": "Sevilla"
+          },
+          "municipio": null,
+          "distrito": null,
+          "partido": null,
+          "seccion": null,
+          "mesa": null
+        },
+        "censo": 1155918,
+        "abstenciones": 520515,
+        "votostotales": 635403,
+        "votosnulos": 2747,
+        "votosvalidos": 632656,
+        "votosblanco": 3474,
+        "votoscandidatura": 629182,
+        "nummesas": 1695
+      },
+      "escrutinio": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199006,
+            "valor": "199006"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 41,
+            "valor": "Sevilla"
+          },
+          "municipio": null,
+          "distrito": null,
+          "partido": null,
+          "seccion": null,
+          "mesa": null
+        },
+        "nombreconjunto": "Formación política",
+        "descripcion": "",
+        "distribucion": "ambito",
+        "votos": [
+          {
+            "conjunto": "PSOE-A - PARTIDO SOCIALISTA OBRERO ESPAÑOL DE ANDALUCIA",
+            "numvotos": 318533,
+            "diputados": 10,
+            "porcentajeVotos": 50.35
+          },
+          {
+            "conjunto": "PP - PARTIDO POPULAR",
+            "numvotos": 123529,
+            "diputados": 4,
+            "porcentajeVotos": 19.53
+          },
+          {
+            "conjunto": "PA - PARTIDO ANDALUCISTA",
+            "numvotos": 86001,
+            "diputados": 2,
+            "porcentajeVotos": 13.59
+          },
+          {
+            "conjunto": "IU-CA - IZQUIERDA UNIDA-CONVOCATORIA POR ANDALUCIA",
+            "numvotos": 79361,
+            "diputados": 2,
+            "porcentajeVotos": 12.54
+          },
+          {
+            "conjunto": "PTE-UC - PARTIDO TRABAJADORES DE ESPAÑA-UNIDAD COMUNISTA",
+            "numvotos": 4478,
+            "diputados": 0,
+            "porcentajeVotos": 0.71
+          },
+          {
+            "conjunto": "VA - VERDES DE ANDALUCIA",
+            "numvotos": 3495,
+            "diputados": 0,
+            "porcentajeVotos": 0.55
+          },
+          {
+            "conjunto": "DS - DEMOCRACIA SOCIALISTA",
+            "numvotos": 3137,
+            "diputados": 0,
+            "porcentajeVotos": 0.5
+          },
+          {
+            "conjunto": "CDS - CENTRO DEMOCRATICO Y SOCIAL",
+            "numvotos": 2578,
+            "diputados": 0,
+            "porcentajeVotos": 0.41
+          },
+          {
+            "conjunto": "LVE - LOS VERDES ECOLOGISTAS",
+            "numvotos": 2316,
+            "diputados": 0,
+            "porcentajeVotos": 0.37
+          },
+          {
+            "conjunto": "PCPA - PARTIDO COMUNISTA DEL PUEBLO ANDALUZ",
+            "numvotos": 1606,
+            "diputados": 0,
+            "porcentajeVotos": 0.25
+          },
+          {
+            "conjunto": "RUIZ-MATEOS - AGRUPACION RUIZ MATEOS",
+            "numvotos": 1578,
+            "diputados": 0,
+            "porcentajeVotos": 0.25
+          },
+          {
+            "conjunto": "PCE-(M.L.) - PARTIDO COMUNISTA DE ESPAÑA (MARXISTA-LENINISTA)",
+            "numvotos": 759,
+            "diputados": 0,
+            "porcentajeVotos": 0.12
+          },
+          {
+            "conjunto": "FE-JONS - FALANGE ESPAÑOLA DE LAS J.O.N.S.",
+            "numvotos": 529,
+            "diputados": 0,
+            "porcentajeVotos": 0.08
+          },
+          {
+            "conjunto": "PH - PARTIDO HUMANISTA",
+            "numvotos": 361,
+            "diputados": 0,
+            "porcentajeVotos": 0.06
+          },
+          {
+            "conjunto": "FAL - FRENTE ANDALUZ DE LIBERACION",
+            "numvotos": 340,
+            "diputados": 0,
+            "porcentajeVotos": 0.05
+          },
+          {
+            "conjunto": "AR - COALICION ALIANZA POR LA REPUBLICA",
+            "numvotos": 339,
+            "diputados": 0,
+            "porcentajeVotos": 0.05
+          },
+          {
+            "conjunto": "MFE - MOVIMIENTO FALANGISTA DE ESPAÑA",
+            "numvotos": 188,
+            "diputados": 0,
+            "porcentajeVotos": 0.03
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "199603/mesa/11",
+    "expected": "inconsistente",
+    "record": {
+      "source": {
+        "api_base": "https://ws040.juntadeandalucia.es/siel-api",
+        "resumen_url": "https://ws040.juntadeandalucia.es/siel-api/v1/resumen/mesa?cautonoma=1&tconvocatoria=5&fconvocatoria=199603&provincia=11&municipio=4&distrito=4&seccion=0007&mesa=U",
+        "escrutinio_url": "https://ws040.juntadeandalucia.es/siel-api/v1/escrutinio/ambito/mesa?cautonoma=1&tconvocatoria=5&fconvocatoria=199603&provincia=11&municipio=4&distrito=4&seccion=0007&mesa=U",
+        "params": {
+          "cautonoma": 1,
+          "tconvocatoria": 5,
+          "fconvocatoria": 199603,
+          "provincia": 11,
+          "municipio": 4,
+          "distrito": 4,
+          "seccion": "0007",
+          "mesa": "U"
+        }
+      },
+      "context": {
+        "tconvocatoria": 5,
+        "fconvocatoria": 199603,
+        "provincia_clave": 11,
+        "provincia_nombre": "Cádiz",
+        "municipio_clave": 4,
+        "municipio_nombre": "ALGECIRAS",
+        "distrito_clave": 4,
+        "distrito_nombre": "Algeciras 04",
+        "seccion_clave": 7,
+        "seccion_valor": "0007",
+        "mesa_clave": 7,
+        "mesa_valor": "U"
+      },
+      "fuente_registro": "api_mesa",
+      "estado_descarga": "ok",
+      "error_descarga": null,
+      "errors": [],
+      "resumen": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199603,
+            "valor": "199603"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 11,
+            "valor": "Cádiz"
+          },
+          "municipio": {
+            "clave": 4,
+            "valor": "ALGECIRAS"
+          },
+          "distrito": {
+            "clave": 4,
+            "valor": "Algeciras 04"
+          },
+          "partido": null,
+          "seccion": {
+            "clave": 7,
+            "valor": "0007"
+          },
+          "mesa": {
+            "clave": 7,
+            "valor": "U"
+          }
+        },
+        "censo": 829,
+        "abstenciones": 262,
+        "votostotales": 567,
+        "votosnulos": 0,
+        "votosvalidos": 567,
+        "votosblanco": 2,
+        "votoscandidatura": 565,
+        "nummesas": 1
+      },
+      "escrutinio": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199603,
+            "valor": "199603"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 11,
+            "valor": "Cádiz"
+          },
+          "municipio": {
+            "clave": 4,
+            "valor": "ALGECIRAS"
+          },
+          "distrito": {
+            "clave": 4,
+            "valor": "Algeciras 04"
+          },
+          "partido": null,
+          "seccion": {
+            "clave": 7,
+            "valor": "0007"
+          },
+          "mesa": {
+            "clave": 7,
+            "valor": "U"
+          }
+        },
+        "nombreconjunto": "Formación política",
+        "descripcion": "",
+        "distribucion": "ambito",
+        "votos": [
+          {
+            "conjunto": "PSOE-A - PARTIDO SOCIALISTA OBRERO ESPAÑOL DE ANDALUCIA",
+            "numvotos": 286,
+            "diputados": null,
+            "porcentajeVotos": 50.44
+          },
+          {
+            "conjunto": "PP - PARTIDO POPULAR",
+            "numvotos": 139,
+            "diputados": null,
+            "porcentajeVotos": 24.51
+          },
+          {
+            "conjunto": "PA - PARTIDO ANDALUCISTA",
+            "numvotos": 82,
+            "diputados": null,
+            "porcentajeVotos": 14.46
+          },
+          {
+            "conjunto": "IULV-CA - IZQUIERDA UNIDA LOS VERDES-CONVOC. POR ANDALUCIA",
+            "numvotos": 51,
+            "diputados": null,
+            "porcentajeVotos": 8.99
+          },
+          {
+            "conjunto": "NA - NACION ANDALUZA",
+            "numvotos": 5,
+            "diputados": null,
+            "porcentajeVotos": 0.88
+          },
+          {
+            "conjunto": "PH - PARTIDO HUMANISTA",
+            "numvotos": 1,
+            "diputados": null,
+            "porcentajeVotos": 0.18
+          },
+          {
+            "conjunto": "UAD - UNIDAD ANDALUZA DEMOCRATICA",
+            "numvotos": 1,
+            "diputados": null,
+            "porcentajeVotos": 0.18
+          },
+          {
+            "conjunto": "FEA - FALANGE ESPAÑOLA AUTENTICA",
+            "numvotos": 1,
+            "diputados": null,
+            "porcentajeVotos": 0.18
+          },
+          {
+            "conjunto": "PCPA - PARTIDO COMUNISTA DEL PUEBLO ANDALUZ",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "199603/mesa/18",
+    "expected": "inconsistente",
+    "record": {
+      "source": {
+        "api_base": "https://ws040.juntadeandalucia.es/siel-api",
+        "resumen_url": "https://ws040.juntadeandalucia.es/siel-api/v1/resumen/mesa?cautonoma=1&tconvocatoria=5&fconvocatoria=199603&provincia=18&municipio=116&distrito=1&seccion=0003&mesa=U",
+        "escrutinio_url": "https://ws040.juntadeandalucia.es/siel-api/v1/escrutinio/ambito/mesa?cautonoma=1&tconvocatoria=5&fconvocatoria=199603&provincia=18&municipio=116&distrito=1&seccion=0003&mesa=U",
+        "params": {
+          "cautonoma": 1,
+          "tconvocatoria": 5,
+          "fconvocatoria": 199603,
+          "provincia": 18,
+          "municipio": 116,
+          "distrito": 1,
+          "seccion": "0003",
+          "mesa": "U"
+        }
+      },
+      "context": {
+        "tconvocatoria": 5,
+        "fconvocatoria": 199603,
+        "provincia_clave": 18,
+        "provincia_nombre": "Granada",
+        "municipio_clave": 116,
+        "municipio_nombre": "LANJARON",
+        "distrito_clave": 1,
+        "distrito_nombre": "Lanjarón",
+        "seccion_clave": 3,
+        "seccion_valor": "0003",
+        "mesa_clave": 3,
+        "mesa_valor": "U"
+      },
+      "fuente_registro": "api_mesa",
+      "estado_descarga": "ok",
+      "error_descarga": null,
+      "errors": [],
+      "resumen": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199603,
+            "valor": "199603"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 18,
+            "valor": "Granada"
+          },
+          "municipio": {
+            "clave": 116,
+            "valor": "LANJARON"
+          },
+          "distrito": {
+            "clave": 1,
+            "valor": "Lanjarón"
+          },
+          "partido": null,
+          "seccion": {
+            "clave": 3,
+            "valor": "0003"
+          },
+          "mesa": {
+            "clave": 3,
+            "valor": "U"
+          }
+        },
+        "censo": 690,
+        "abstenciones": 154,
+        "votostotales": 536,
+        "votosnulos": 6,
+        "votosvalidos": 530,
+        "votosblanco": 3,
+        "votoscandidatura": 527,
+        "nummesas": 1
+      },
+      "escrutinio": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199603,
+            "valor": "199603"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 18,
+            "valor": "Granada"
+          },
+          "municipio": {
+            "clave": 116,
+            "valor": "LANJARON"
+          },
+          "distrito": {
+            "clave": 1,
+            "valor": "Lanjarón"
+          },
+          "partido": null,
+          "seccion": {
+            "clave": 3,
+            "valor": "0003"
+          },
+          "mesa": {
+            "clave": 3,
+            "valor": "U"
+          }
+        },
+        "nombreconjunto": "Formación política",
+        "descripcion": "",
+        "distribucion": "ambito",
+        "votos": [
+          {
+            "conjunto": "PP - PARTIDO POPULAR",
+            "numvotos": 223,
+            "diputados": null,
+            "porcentajeVotos": 42.08
+          },
+          {
+            "conjunto": "PSOE-A - PARTIDO SOCIALISTA OBRERO ESPAÑOL DE ANDALUCIA",
+            "numvotos": 197,
+            "diputados": null,
+            "porcentajeVotos": 37.17
+          },
+          {
+            "conjunto": "PA - PARTIDO ANDALUCISTA",
+            "numvotos": 63,
+            "diputados": null,
+            "porcentajeVotos": 11.89
+          },
+          {
+            "conjunto": "IULV-CA - IZQUIERDA UNIDA LOS VERDES-CONVOC. POR ANDALUCIA",
+            "numvotos": 40,
+            "diputados": null,
+            "porcentajeVotos": 7.55
+          },
+          {
+            "conjunto": "PCPA - PARTIDO COMUNISTA DEL PUEBLO ANDALUZ",
+            "numvotos": 2,
+            "diputados": null,
+            "porcentajeVotos": 0.38
+          },
+          {
+            "conjunto": "UC - UNION CENTRISTA",
+            "numvotos": 1,
+            "diputados": null,
+            "porcentajeVotos": 0.19
+          },
+          {
+            "conjunto": "PH - PARTIDO HUMANISTA",
+            "numvotos": 1,
+            "diputados": null,
+            "porcentajeVotos": 0.19
+          },
+          {
+            "conjunto": "NA - NACION ANDALUZA",
+            "numvotos": 1,
+            "diputados": null,
+            "porcentajeVotos": 0.19
+          },
+          {
+            "conjunto": "FEA - FALANGE ESPAÑOLA AUTENTICA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "199603/mesa/29",
+    "expected": "inconsistente",
+    "record": {
+      "source": {
+        "api_base": "https://ws040.juntadeandalucia.es/siel-api",
+        "resumen_url": "https://ws040.juntadeandalucia.es/siel-api/v1/resumen/mesa?cautonoma=1&tconvocatoria=5&fconvocatoria=199603&provincia=29&municipio=5&distrito=1&seccion=0003&mesa=A",
+        "escrutinio_url": "https://ws040.juntadeandalucia.es/siel-api/v1/escrutinio/ambito/mesa?cautonoma=1&tconvocatoria=5&fconvocatoria=199603&provincia=29&municipio=5&distrito=1&seccion=0003&mesa=A",
+        "params": {
+          "cautonoma": 1,
+          "tconvocatoria": 5,
+          "fconvocatoria": 199603,
+          "provincia": 29,
+          "municipio": 5,
+          "distrito": 1,
+          "seccion": "0003",
+          "mesa": "A"
+        }
+      },
+      "context": {
+        "tconvocatoria": 5,
+        "fconvocatoria": 199603,
+        "provincia_clave": 29,
+        "provincia_nombre": "Málaga",
+        "municipio_clave": 5,
+        "municipio_nombre": "ALGARROBO",
+        "distrito_clave": 1,
+        "distrito_nombre": "Algarrobo",
+        "seccion_clave": 3,
+        "seccion_valor": "0003",
+        "mesa_clave": 3,
+        "mesa_valor": "A"
+      },
+      "fuente_registro": "api_mesa",
+      "estado_descarga": "ok",
+      "error_descarga": null,
+      "errors": [],
+      "resumen": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199603,
+            "valor": "199603"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 29,
+            "valor": "Málaga"
+          },
+          "municipio": {
+            "clave": 5,
+            "valor": "ALGARROBO"
+          },
+          "distrito": {
+            "clave": 1,
+            "valor": "Algarrobo"
+          },
+          "partido": null,
+          "seccion": {
+            "clave": 3,
+            "valor": "0003"
+          },
+          "mesa": {
+            "clave": 3,
+            "valor": "A"
+          }
+        },
+        "censo": 489,
+        "abstenciones": 274,
+        "votostotales": 215,
+        "votosnulos": 0,
+        "votosvalidos": 215,
+        "votosblanco": 1,
+        "votoscandidatura": 214,
+        "nummesas": 1
+      },
+      "escrutinio": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 199603,
+            "valor": "199603"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 29,
+            "valor": "Málaga"
+          },
+          "municipio": {
+            "clave": 5,
+            "valor": "ALGARROBO"
+          },
+          "distrito": {
+            "clave": 1,
+            "valor": "Algarrobo"
+          },
+          "partido": null,
+          "seccion": {
+            "clave": 3,
+            "valor": "0003"
+          },
+          "mesa": {
+            "clave": 3,
+            "valor": "A"
+          }
+        },
+        "nombreconjunto": "Formación política",
+        "descripcion": "",
+        "distribucion": "ambito",
+        "votos": [
+          {
+            "conjunto": "PSOE-A - PARTIDO SOCIALISTA OBRERO ESPAÑOL DE ANDALUCIA",
+            "numvotos": 190,
+            "diputados": null,
+            "porcentajeVotos": 88.37
+          },
+          {
+            "conjunto": "PP - PARTIDO POPULAR",
+            "numvotos": 162,
+            "diputados": null,
+            "porcentajeVotos": 75.35
+          },
+          {
+            "conjunto": "IULV-CA - IZQUIERDA UNIDA LOS VERDES-CONVOC. POR ANDALUCIA",
+            "numvotos": 31,
+            "diputados": null,
+            "porcentajeVotos": 14.42
+          },
+          {
+            "conjunto": "PA - PARTIDO ANDALUCISTA",
+            "numvotos": 19,
+            "diputados": null,
+            "porcentajeVotos": 8.84
+          },
+          {
+            "conjunto": "NA - NACION ANDALUZA",
+            "numvotos": 2,
+            "diputados": null,
+            "porcentajeVotos": 0.93
+          },
+          {
+            "conjunto": "UAD - UNIDAD ANDALUZA DEMOCRATICA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "FEA - FALANGE ESPAÑOLA AUTENTICA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "UC - UNION CENTRISTA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "PH - PARTIDO HUMANISTA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "PCPA - PARTIDO COMUNISTA DEL PUEBLO ANDALUZ",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "201812/cautonoma/ALL/total",
+    "expected": "inconsistente",
+    "record": {
+      "source": {
+        "params": {
+          "cautonoma": 1,
+          "tconvocatoria": 5,
+          "fconvocatoria": 201812
+        }
+      },
+      "estado_descarga": "ok",
+      "resumen": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 201812,
+            "valor": "201812"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": null,
+          "municipio": null,
+          "distrito": null,
+          "partido": null,
+          "seccion": null,
+          "mesa": null
+        },
+        "censo": 6542076,
+        "abstenciones": 2842114,
+        "votostotales": 3699962,
+        "votosnulos": 81388,
+        "votosvalidos": 3618591,
+        "votosblanco": 56939,
+        "votoscandidatura": 3561652,
+        "nummesas": 10046
+      },
+      "escrutinio": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 201812,
+            "valor": "201812"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": null,
+          "municipio": null,
+          "distrito": null,
+          "partido": null,
+          "seccion": null,
+          "mesa": null
+        },
+        "nombreconjunto": "Formación política",
+        "descripcion": "",
+        "distribucion": "ambito",
+        "votos": [
+          {
+            "conjunto": "PSOE-A - PARTIDO SOCIALISTA OBRERO ESPAÑOL DE ANDALUCÍA",
+            "numvotos": 1010889,
+            "diputados": null,
+            "porcentajeVotos": 27.94
+          },
+          {
+            "conjunto": "PP - PARTIDO POPULAR",
+            "numvotos": 750778,
+            "diputados": null,
+            "porcentajeVotos": 20.75
+          },
+          {
+            "conjunto": "Cs - CIUDADANOS-PARTIDO DE LA CIUDADANÍA",
+            "numvotos": 661371,
+            "diputados": null,
+            "porcentajeVotos": 18.28
+          },
+          {
+            "conjunto": "ADELANTE ANDALUCÍA - ADELANTE ANDALUCÍA - PODEMOS - IZQUIERDA UNIDA - PRIMAVERA ANDALUZA - IZQUIERDA ANDALUCISTA",
+            "numvotos": 585949,
+            "diputados": null,
+            "porcentajeVotos": 16.19
+          },
+          {
+            "conjunto": "VOX - VOX",
+            "numvotos": 396607,
+            "diputados": null,
+            "porcentajeVotos": 10.96
+          },
+          {
+            "conjunto": "PACMA - PARTIDO ANIMALISTA CONTRA EL MALTRATO ANIMAL",
+            "numvotos": 69905,
+            "diputados": null,
+            "porcentajeVotos": 1.93
+          },
+          {
+            "conjunto": "AxSÍ - ANDALUCÍA POR SÍ",
+            "numvotos": 22032,
+            "diputados": null,
+            "porcentajeVotos": 0.61
+          },
+          {
+            "conjunto": "EQUO-INICIATIVA - EQUO VERDES-INICIATIVA ANDALUCÍA",
+            "numvotos": 15172,
+            "diputados": null,
+            "porcentajeVotos": 0.42
+          },
+          {
+            "conjunto": "RECORTES CERO - M+J - GV - RECORTES CERO - POR UN MUNDO MÁS JUSTO - GRUPO VERDE",
+            "numvotos": 7207,
+            "diputados": null,
+            "porcentajeVotos": 0.2
+          },
+          {
+            "conjunto": "PCPA - PARTIDO COMUNISTA DEL PUEBLO ANDALUZ",
+            "numvotos": 6435,
+            "diputados": null,
+            "porcentajeVotos": 0.18
+          },
+          {
+            "conjunto": "UPYD - UNIÓN PROGRESO Y DEMOCRACIA",
+            "numvotos": 6384,
+            "diputados": null,
+            "porcentajeVotos": 0.18
+          },
+          {
+            "conjunto": "NA - NACIÓN ANDALUZA",
+            "numvotos": 5015,
+            "diputados": null,
+            "porcentajeVotos": 0.14
+          },
+          {
+            "conjunto": "IxH - INDEPENDIENTES HUELVA",
+            "numvotos": 3995,
+            "diputados": null,
+            "porcentajeVotos": 0.11
+          },
+          {
+            "conjunto": "CILUS - CIUDADANOS LIBRES UNIDOS",
+            "numvotos": 3995,
+            "diputados": null,
+            "porcentajeVotos": 0.11
+          },
+          {
+            "conjunto": "P.C.O.E. - PARTIDO COMUNISTA OBRERO ESPAÑOL",
+            "numvotos": 3111,
+            "diputados": null,
+            "porcentajeVotos": 0.09
+          },
+          {
+            "conjunto": "EB - ESCAÑOS EN BLANCO",
+            "numvotos": 3008,
+            "diputados": null,
+            "porcentajeVotos": 0.08
+          },
+          {
+            "conjunto": "FE de las JONS - FALANGE ESPAÑOLA DE LAS J.O.N.S.",
+            "numvotos": 2460,
+            "diputados": null,
+            "porcentajeVotos": 0.07
+          },
+          {
+            "conjunto": "ALTER - ALTERNATIVA REPUBLICANA",
+            "numvotos": 1987,
+            "diputados": null,
+            "porcentajeVotos": 0.05
+          },
+          {
+            "conjunto": "CAnda - CONVERGENCIA ANDALUZA",
+            "numvotos": 1189,
+            "diputados": null,
+            "porcentajeVotos": 0.03
+          },
+          {
+            "conjunto": "Respeto - RESPETO",
+            "numvotos": 1034,
+            "diputados": null,
+            "porcentajeVotos": 0.03
+          },
+          {
+            "conjunto": "CILU-LINARES - CIUDADANOS INDEPENDIENTES DE LINARES UNIDOS",
+            "numvotos": 965,
+            "diputados": null,
+            "porcentajeVotos": 0.03
+          },
+          {
+            "conjunto": "IZAR - IZQUIERDA ANTICAPITALISTA REVOLUCIONARIA",
+            "numvotos": 654,
+            "diputados": null,
+            "porcentajeVotos": 0.02
+          },
+          {
+            "conjunto": "SOLUCIONA - SOLUCIONA",
+            "numvotos": 500,
+            "diputados": null,
+            "porcentajeVotos": 0.01
+          },
+          {
+            "conjunto": "ConecAnd - Conecta Andalucía",
+            "numvotos": 456,
+            "diputados": null,
+            "porcentajeVotos": 0.01
+          },
+          {
+            "conjunto": "UNIDOS SÍ-Democracia Efectiva - UNIDOS Y SOCIALISTAS+ POR LA DEMOCRACIA",
+            "numvotos": 326,
+            "diputados": null,
+            "porcentajeVotos": 0.01
+          },
+          {
+            "conjunto": "RISA - PARTIDO REPUBLICANO INDEPENDIENTE SOLIDARIO ANDALUZ",
+            "numvotos": 228,
+            "diputados": null,
+            "porcentajeVotos": 0.01
+          },
+          {
+            "conjunto": "PCTE - COMUNISTAS DE ANDALUCÍA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "201812/provincia/14/total",
+    "expected": "inconsistente",
+    "record": {
+      "source": {
+        "params": {
+          "cautonoma": 1,
+          "tconvocatoria": 5,
+          "fconvocatoria": 201812,
+          "provincia": 14
+        }
+      },
+      "estado_descarga": "ok",
+      "resumen": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 201812,
+            "valor": "201812"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 14,
+            "valor": "Córdoba"
+          },
+          "municipio": null,
+          "distrito": null,
+          "partido": null,
+          "seccion": null,
+          "mesa": null
+        },
+        "censo": 647427,
+        "abstenciones": 255525,
+        "votostotales": 391902,
+        "votosnulos": 9377,
+        "votosvalidos": 382542,
+        "votosblanco": 6408,
+        "votoscandidatura": 376134,
+        "nummesas": 908
+      },
+      "escrutinio": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 201812,
+            "valor": "201812"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 14,
+            "valor": "Córdoba"
+          },
+          "municipio": null,
+          "distrito": null,
+          "partido": null,
+          "seccion": null,
+          "mesa": null
+        },
+        "nombreconjunto": "Formación política",
+        "descripcion": "",
+        "distribucion": "ambito",
+        "votos": [
+          {
+            "conjunto": "PSOE-A - PARTIDO SOCIALISTA OBRERO ESPAÑOL DE ANDALUCÍA",
+            "numvotos": 111826,
+            "diputados": null,
+            "porcentajeVotos": 29.23
+          },
+          {
+            "conjunto": "PP - PARTIDO POPULAR",
+            "numvotos": 83838,
+            "diputados": null,
+            "porcentajeVotos": 21.92
+          },
+          {
+            "conjunto": "Cs - CIUDADANOS-PARTIDO DE LA CIUDADANÍA",
+            "numvotos": 67508,
+            "diputados": null,
+            "porcentajeVotos": 17.65
+          },
+          {
+            "conjunto": "ADELANTE ANDALUCÍA - ADELANTE ANDALUCÍA - PODEMOS - IZQUIERDA UNIDA - PRIMAVERA ANDALUZA - IZQUIERDA ANDALUCISTA",
+            "numvotos": 64279,
+            "diputados": null,
+            "porcentajeVotos": 16.8
+          },
+          {
+            "conjunto": "VOX - VOX",
+            "numvotos": 35147,
+            "diputados": null,
+            "porcentajeVotos": 9.19
+          },
+          {
+            "conjunto": "PACMA - PARTIDO ANIMALISTA CONTRA EL MALTRATO ANIMAL",
+            "numvotos": 5899,
+            "diputados": null,
+            "porcentajeVotos": 1.54
+          },
+          {
+            "conjunto": "AxSÍ - ANDALUCÍA POR SÍ",
+            "numvotos": 1606,
+            "diputados": null,
+            "porcentajeVotos": 0.42
+          },
+          {
+            "conjunto": "EQUO-INICIATIVA - EQUO VERDES-INICIATIVA ANDALUCÍA",
+            "numvotos": 1467,
+            "diputados": null,
+            "porcentajeVotos": 0.38
+          },
+          {
+            "conjunto": "EB - ESCAÑOS EN BLANCO",
+            "numvotos": 1144,
+            "diputados": null,
+            "porcentajeVotos": 0.3
+          },
+          {
+            "conjunto": "P.C.O.E. - PARTIDO COMUNISTA OBRERO ESPAÑOL",
+            "numvotos": 978,
+            "diputados": null,
+            "porcentajeVotos": 0.26
+          },
+          {
+            "conjunto": "PCPA - PARTIDO COMUNISTA DEL PUEBLO ANDALUZ",
+            "numvotos": 886,
+            "diputados": null,
+            "porcentajeVotos": 0.23
+          },
+          {
+            "conjunto": "RECORTES CERO - M+J - GV - RECORTES CERO - POR UN MUNDO MÁS JUSTO - GRUPO VERDE",
+            "numvotos": 621,
+            "diputados": null,
+            "porcentajeVotos": 0.16
+          },
+          {
+            "conjunto": "UPYD - UNIÓN PROGRESO Y DEMOCRACIA",
+            "numvotos": 600,
+            "diputados": null,
+            "porcentajeVotos": 0.16
+          },
+          {
+            "conjunto": "FE de las JONS - FALANGE ESPAÑOLA DE LAS J.O.N.S.",
+            "numvotos": 335,
+            "diputados": null,
+            "porcentajeVotos": 0.09
+          },
+          {
+            "conjunto": "PCTE - COMUNISTAS DE ANDALUCÍA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "202605/mesa/4",
+    "expected": "ok",
+    "record": {
+      "source": {
+        "api_base": "https://ws040.juntadeandalucia.es/siel-api",
+        "resumen_url": "https://ws040.juntadeandalucia.es/siel-api/v1/resumen/mesa?cautonoma=1&tconvocatoria=5&fconvocatoria=202605&provincia=4&municipio=38&distrito=1&seccion=0002&mesa=C",
+        "escrutinio_url": "https://ws040.juntadeandalucia.es/siel-api/v1/escrutinio/ambito/mesa?cautonoma=1&tconvocatoria=5&fconvocatoria=202605&provincia=4&municipio=38&distrito=1&seccion=0002&mesa=C",
+        "params": {
+          "cautonoma": 1,
+          "tconvocatoria": 5,
+          "fconvocatoria": 202605,
+          "provincia": 4,
+          "municipio": 38,
+          "distrito": 1,
+          "seccion": "0002",
+          "mesa": "C"
+        }
+      },
+      "context": {
+        "tconvocatoria": 5,
+        "fconvocatoria": 202605,
+        "provincia_clave": 4,
+        "provincia_nombre": "Almería",
+        "municipio_clave": 38,
+        "municipio_nombre": "DALIAS",
+        "distrito_clave": 1,
+        "distrito_nombre": "DALÍAS 1",
+        "seccion_clave": 2,
+        "seccion_valor": "0002",
+        "mesa_clave": 2,
+        "mesa_valor": "C"
+      },
+      "fuente_registro": "api_mesa",
+      "estado_descarga": "ok",
+      "error_descarga": null,
+      "errors": [],
+      "resumen": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 202605,
+            "valor": "202605"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 4,
+            "valor": "Almería"
+          },
+          "municipio": {
+            "clave": 38,
+            "valor": "DALIAS"
+          },
+          "distrito": {
+            "clave": 1,
+            "valor": "DALÍAS 1"
+          },
+          "partido": null,
+          "seccion": {
+            "clave": 2,
+            "valor": "0002"
+          },
+          "mesa": {
+            "clave": 2,
+            "valor": "C"
+          }
+        },
+        "censo": 400,
+        "abstenciones": 136,
+        "votostotales": 264,
+        "votosnulos": 4,
+        "votosvalidos": 260,
+        "votosblanco": 2,
+        "votoscandidatura": 258,
+        "nummesas": 1
+      },
+      "escrutinio": {
+        "idescrutinio": {
+          "tconvocatoria": {
+            "clave": 5,
+            "valor": "Elecciones Autonómicas"
+          },
+          "fconvocatoria": {
+            "clave": 202605,
+            "valor": "202605"
+          },
+          "cautonoma": {
+            "clave": 1,
+            "valor": "Andalucía"
+          },
+          "provincia": {
+            "clave": 4,
+            "valor": "Almería"
+          },
+          "municipio": {
+            "clave": 38,
+            "valor": "DALIAS"
+          },
+          "distrito": {
+            "clave": 1,
+            "valor": "DALÍAS 1"
+          },
+          "partido": null,
+          "seccion": {
+            "clave": 2,
+            "valor": "0002"
+          },
+          "mesa": {
+            "clave": 2,
+            "valor": "C"
+          }
+        },
+        "nombreconjunto": "Formación política",
+        "descripcion": "",
+        "distribucion": "ambito",
+        "votos": [
+          {
+            "conjunto": "PP - PARTIDO POPULAR",
+            "numvotos": 86,
+            "diputados": null,
+            "porcentajeVotos": 33.08
+          },
+          {
+            "conjunto": "PSOE-A - PARTIDO SOCIALISTA OBRERO ESPAÑOL",
+            "numvotos": 77,
+            "diputados": null,
+            "porcentajeVotos": 29.62
+          },
+          {
+            "conjunto": "VOX - VOX",
+            "numvotos": 65,
+            "diputados": null,
+            "porcentajeVotos": 25.0
+          },
+          {
+            "conjunto": "PorA - POR ANDALUCÍA: IZQUIERDA UNIDA ANDALUCÍA - PODEMOS - MOVIMIENTO SUMAR - INICIATIVA DEL PUEBLO ANDALUZ - VERDES EQUO - ALTERNATIVA REPUBLICANA - ALIANZA VERDE",
+            "numvotos": 14,
+            "diputados": null,
+            "porcentajeVotos": 5.38
+          },
+          {
+            "conjunto": "ADELANTE ANDALUCÍA - ADELANTE ANDALUCÍA",
+            "numvotos": 10,
+            "diputados": null,
+            "porcentajeVotos": 3.85
+          },
+          {
+            "conjunto": "SALF - SE ACABÓ LA FIESTA",
+            "numvotos": 5,
+            "diputados": null,
+            "porcentajeVotos": 1.92
+          },
+          {
+            "conjunto": "ANDALUCISTAS - PA - ANDALUCISTAS - PUEBLO ANDALUZ",
+            "numvotos": 1,
+            "diputados": null,
+            "porcentajeVotos": 0.38
+          },
+          {
+            "conjunto": "ESCAÑOS EN BLANCO - ESCAÑOS EN BLANCO PARA DEJAR ESCAÑOS VACÍOS",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "IPAL - IZQUIERDA POR ALMERÍA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "NA - NACIÓN ANDALUZA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "FE de las JONS - FALANGE ESPAÑOLA DE LAS JONS",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "PARTIDO AUTÓNOMOS - PARTIDO AUTÓNOMOS",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "PACMA - PARTIDO ANIMALISTA CON EL MEDIO AMBIENTE",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "PCPA - PARTIDO COMUNISTA DEL PUEBLO ANDALUZ",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "MUNDO+JUSTO - POR UN MUNDO MÁS JUSTO",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "IZAR - IZQUIERDA ANTICAPITALISTA REVOLUCIONARIA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          },
+          {
+            "conjunto": "ALM - ALMERIENSES - REGIONALISTAS PRO ALMERÍA",
+            "numvotos": 0,
+            "diputados": null,
+            "porcentajeVotos": 0.0
+          }
+        ]
+      }
+    }
+  }
+]

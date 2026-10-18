@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -14,6 +15,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from andalucia_siel.client import BASE_URL, SielApiError, SielClient
+from andalucia_siel.quality import assess_record, retryable_record
+from andalucia_siel.storage import open_text, raw_path as find_raw_path, read_records, replace_records, unique_records
 
 TCONVOCATORIA_AUTONOMICAS = 5
 CAUTONOMA_ANDALUCIA = 1
@@ -48,6 +51,8 @@ DOWNLOAD_FIELDS = [
     "fuente_registro",
     "estado_descarga",
     "error_descarga",
+    "estado_calidad",
+    "incidencias_calidad",
 ]
 
 LONG_FIELDS = CONTEXT_FIELDS + SUMMARY_FIELDS + [
@@ -159,11 +164,19 @@ def download_fields(record: dict[str, Any], default_fuente: str) -> dict[str, An
         "fuente_registro": record.get("fuente_registro", default_fuente),
         "estado_descarga": record.get("estado_descarga", "ok"),
         "error_descarga": record.get("error_descarga") or error_text(record.get("errors")),
+        **assess_record(record),
     }
 
 
 def party_votes_are_known(record: dict[str, Any]) -> bool:
-    return record.get("estado_descarga", "ok") not in MISSING_PARTY_VOTES_STATUSES
+    return (record.get("estado_descarga", "ok") not in MISSING_PARTY_VOTES_STATUSES
+            and assess_record(record)["estado_calidad"] != "incompleto")
+
+
+def record_votes(record: dict[str, Any]) -> list[dict[str, Any]]:
+    scrutiny = record.get("escrutinio")
+    votes = scrutiny.get("votos") if isinstance(scrutiny, dict) else None
+    return [vote for vote in votes if isinstance(vote, dict)] if isinstance(votes, list) else []
 
 
 def write_json(path: Path, data: Any) -> None:
@@ -172,19 +185,11 @@ def write_json(path: Path, data: Any) -> None:
 
 
 def read_ndjson(path: Path) -> Iterable[dict[str, Any]]:
-    with path.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            if line.strip():
-                yield json.loads(line)
+    return read_records(path)
 
 
 def count_ndjson_records(path: Path) -> int:
-    count = 0
-    with path.open("r", encoding="utf-8") as handle:
-        for line in handle:
-            if line.strip():
-                count += 1
-    return count
+    return sum(1 for _ in read_ndjson(path))
 
 
 def mesa_params(context: dict[str, Any]) -> dict[str, Any]:
@@ -570,7 +575,7 @@ def write_long_csv(ndjson_path: Path, csv_path: Path) -> int:
         writer.writeheader()
         for record in read_ndjson(ndjson_path):
             base = base_csv_row(record)
-            for voto in record.get("escrutinio", {}).get("votos", []):
+            for voto in record_votes(record):
                 row = dict(base)
                 row.update(
                     {
@@ -590,13 +595,13 @@ def write_wide_csv(ndjson_path: Path, csv_path: Path) -> int:
     conjuntos: list[str] = []
     seen: set[str] = set()
     for record in read_ndjson(ndjson_path):
-        for voto in record.get("escrutinio", {}).get("votos", []):
+        for voto in record_votes(record):
             conjunto = voto.get("conjunto")
             if conjunto and conjunto not in seen:
                 seen.add(conjunto)
                 conjuntos.append(conjunto)
 
-    fieldnames = CONTEXT_FIELDS + SUMMARY_FIELDS + DOWNLOAD_FIELDS + conjuntos
+    fieldnames = CONTEXT_FIELDS + SUMMARY_FIELDS + DOWNLOAD_FIELDS + sorted(conjuntos)
     row_count = 0
     with csv_path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -605,7 +610,7 @@ def write_wide_csv(ndjson_path: Path, csv_path: Path) -> int:
             row = base_csv_row(record)
             default_value = 0 if party_votes_are_known(record) else None
             row.update({conjunto: default_value for conjunto in conjuntos})
-            for voto in record.get("escrutinio", {}).get("votos", []):
+            for voto in record_votes(record):
                 conjunto = voto.get("conjunto")
                 if conjunto:
                     row[conjunto] = voto.get("numvotos", 0)
@@ -622,7 +627,7 @@ def write_rausentes_long_csv(ndjson_path: Path, csv_path: Path) -> int:
         writer.writeheader()
         for record in read_ndjson(ndjson_path):
             base = base_rausentes_csv_row(record)
-            for voto in record.get("escrutinio", {}).get("votos", []):
+            for voto in record_votes(record):
                 row = dict(base)
                 row.update(
                     {
@@ -642,13 +647,13 @@ def write_rausentes_wide_csv(ndjson_path: Path, csv_path: Path) -> int:
     conjuntos: list[str] = []
     seen: set[str] = set()
     for record in read_ndjson(ndjson_path):
-        for voto in record.get("escrutinio", {}).get("votos", []):
+        for voto in record_votes(record):
             conjunto = voto.get("conjunto")
             if conjunto and conjunto not in seen:
                 seen.add(conjunto)
                 conjuntos.append(conjunto)
 
-    fieldnames = RAUSENTES_CONTEXT_FIELDS + SUMMARY_FIELDS + DOWNLOAD_FIELDS + conjuntos
+    fieldnames = RAUSENTES_CONTEXT_FIELDS + SUMMARY_FIELDS + DOWNLOAD_FIELDS + sorted(conjuntos)
     row_count = 0
     with csv_path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -657,7 +662,7 @@ def write_rausentes_wide_csv(ndjson_path: Path, csv_path: Path) -> int:
             row = base_rausentes_csv_row(record)
             default_value = 0 if party_votes_are_known(record) else None
             row.update({conjunto: default_value for conjunto in conjuntos})
-            for voto in record.get("escrutinio", {}).get("votos", []):
+            for voto in record_votes(record):
                 conjunto = voto.get("conjunto")
                 if conjunto:
                     row[conjunto] = voto.get("numvotos", 0)
@@ -748,13 +753,13 @@ def write_complete_csv(mesas_path: Path, rausentes_path: Path | None, csv_path: 
     conjuntos: list[str] = []
     seen: set[str] = set()
     for source in iter_complete_source_records(mesas_path, rausentes_path):
-        for voto in source["record"].get("escrutinio", {}).get("votos", []):
+        for voto in record_votes(source["record"]):
             conjunto = voto.get("conjunto")
             if conjunto and conjunto not in seen:
                 seen.add(conjunto)
                 conjuntos.append(conjunto)
 
-    fieldnames = COMPLETE_BASE_FIELDS + conjuntos
+    fieldnames = COMPLETE_BASE_FIELDS + sorted(conjuntos)
     row_count = 0
     with csv_path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -764,7 +769,7 @@ def write_complete_csv(mesas_path: Path, rausentes_path: Path | None, csv_path: 
             row = complete_row_base(source)
             default_value = 0 if party_votes_are_known(record) else None
             row.update({conjunto: default_value for conjunto in conjuntos})
-            for voto in record.get("escrutinio", {}).get("votos", []):
+            for voto in record_votes(record):
                 conjunto = voto.get("conjunto")
                 if conjunto:
                     row[conjunto] = voto.get("numvotos", 0)
@@ -782,7 +787,7 @@ def write_mesa_incidents_csv(ndjson_path: Path, csv_path: Path) -> int:
         writer.writeheader()
         for record in read_ndjson(ndjson_path):
             status = record.get("estado_descarga", "ok")
-            if status == "ok" and not record.get("errors"):
+            if status == "ok" and not record.get("errors") and assess_record(record)["estado_calidad"] == "ok":
                 continue
             row = {field: record.get("context", {}).get(field) for field in CONTEXT_FIELDS}
             row.update(download_fields(record, "api_mesa"))
@@ -823,211 +828,215 @@ def list_convocatorias(client: SielClient) -> None:
         print(f"{item['clave']},{item['valor']}")
 
 
-def download_convocatoria(
-    client: SielClient,
-    fconvocatoria: int,
-    output_dir: Path,
-    workers: int,
-    province_filter: set[int] | None,
-    limit: int | None,
-    raw_only: bool,
-    overwrite: bool,
-    resume: bool,
-) -> None:
-    raw_path = output_dir / "raw" / f"mesas_{fconvocatoria}.ndjson"
-    catalog_path = output_dir / "processed" / f"mesas_{fconvocatoria}_catalog.csv"
-    long_path = output_dir / "processed" / f"mesas_{fconvocatoria}_long.csv"
-    wide_path = output_dir / "processed" / f"mesas_{fconvocatoria}_wide.csv"
-    complete_path = output_dir / "processed" / f"andalucia_{fconvocatoria}_completo.csv"
-    incidents_path = output_dir / "processed" / f"mesas_{fconvocatoria}_incidencias.csv"
-    rausentes_raw_path = output_dir / "raw" / f"rausentes_{fconvocatoria}.ndjson"
-    manifest_path = output_dir / f"manifest_{fconvocatoria}.json"
+def catalog_scope(fconvocatoria: int, province_filter: set[int] | None, limit: int | None) -> dict[str, Any]:
+    return {"version": 1, "fconvocatoria": fconvocatoria, "tconvocatoria": 5,
+            "provinces": sorted(province_filter) if province_filter else None, "limit_mesas": limit}
 
-    if raw_path.exists() and not overwrite and not resume:
-        raise SystemExit(f"{raw_path} already exists. Use --overwrite to replace it.")
 
-    if resume and catalog_path.exists() and limit is None:
-        contexts = sort_mesa_contexts(read_catalog_csv(catalog_path))
-        print(f"[{fconvocatoria}] usando catálogo existente: {len(contexts)} mesas", file=sys.stderr)
-    else:
-        print(f"[{fconvocatoria}] enumerando mesas", file=sys.stderr)
-        contexts = sort_mesa_contexts(list(iter_mesa_contexts(client, fconvocatoria, province_filter, limit, workers)))
-        print(f"[{fconvocatoria}] {len(contexts)} mesas encontradas", file=sys.stderr)
-        write_catalog_csv(catalog_path, contexts)
+def catalog_digest(contexts: list[dict[str, Any]]) -> str:
+    keys = sorted(context_key(c) for c in contexts)
+    return hashlib.sha256(json.dumps(keys, ensure_ascii=False).encode()).hexdigest()
 
-    raw_path.parent.mkdir(parents=True, exist_ok=True)
-    existing_keys: set[tuple[Any, ...]] = set()
-    if resume and raw_path.exists() and not overwrite:
-        for record in read_ndjson(raw_path):
-            existing_keys.add(context_key(record["context"]))
-        print(
-            f"[{fconvocatoria}] reanudando: {len(existing_keys)}/{len(contexts)} mesas ya descargadas",
-            file=sys.stderr,
-        )
 
-    remaining_contexts = [context for context in contexts if context_key(context) not in existing_keys]
-    mode = "w" if overwrite or not raw_path.exists() else "a"
-    with raw_path.open(mode, encoding="utf-8") as handle:
-        if remaining_contexts:
-            with ThreadPoolExecutor(max_workers=max(workers, 1)) as executor:
-                futures = {executor.submit(download_mesa, client, context): context for context in remaining_contexts}
-                for index, future in enumerate(as_completed(futures), start=1):
-                    context = futures[future]
-                    try:
-                        record = future.result()
-                    except Exception as exc:
-                        record = unavailable_mesa_record(client, context, exc)
+def check_catalog(contexts: list[dict[str, Any]], election: int) -> set[tuple]:
+    if not contexts:
+        raise ValueError(f"Catálogo vacío para {election}; no se puede declarar completo.")
+    keys = set()
+    for context in contexts:
+        if context.get("fconvocatoria") != election or context.get("tconvocatoria") != 5:
+            raise ValueError("El catálogo contiene otra convocatoria.")
+        if any(context.get(field) in (None, "") for field in (
+            "provincia_clave", "municipio_clave", "distrito_clave", "seccion_valor", "mesa_valor")):
+            raise ValueError("El catálogo contiene una clave incompleta.")
+        key = context_key(context)
+        if key in keys:
+            raise ValueError(f"Clave duplicada en catálogo: {key}")
+        keys.add(key)
+    return keys
+
+
+def cera_key(context: dict[str, Any]) -> tuple:
+    return (context.get("tconvocatoria"), context.get("fconvocatoria"),
+            context.get("ambito"), context.get("provincia_clave"))
+
+
+def update_raw(client, contexts, path, election, key, fetch, fallback, workers, resume, overwrite, retry_failed):
+    existing = unique_records(path, key, election) if resume and not overwrite else {}
+    expected = {key(context) for context in contexts}
+    if set(existing) - expected:
+        raise ValueError("El raw contiene registros fuera del ámbito solicitado. Usa otra carpeta para reducir el ámbito.")
+    pending = [ctx for ctx in contexts if key(ctx) not in existing
+               or (retry_failed and retryable_record(existing[key(ctx)]))]
+    replacements = {}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    mode = "a" if resume and path.exists() and not overwrite else "w"
+    with open_text(path, mode) as handle:
+        with ThreadPoolExecutor(max_workers=max(workers, 1)) as executor:
+            futures = {executor.submit(fetch, client, ctx): ctx for ctx in pending}
+            for future in as_completed(futures):
+                ctx = futures[future]
+                try:
+                    record = future.result()
+                except Exception as exc:
+                    record = fallback(client, ctx, exc)
+                identity = key(ctx)
+                if identity in existing:
+                    # Retry replacements never append a duplicate identity.
+                    replacements[identity] = record
+                else:
                     handle.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
-                    completed = len(existing_keys) + index
-                    if completed % 500 == 0 or completed == len(contexts):
-                        print(f"[{fconvocatoria}] descargadas {completed}/{len(contexts)} mesas", file=sys.stderr)
-        else:
-            print(f"[{fconvocatoria}] raw de mesas ya completo; regenerando derivados", file=sys.stderr)
-
-    long_rows = None
-    wide_rows = None
-    complete_rows = None
-    incident_rows = write_mesa_incidents_csv(raw_path, incidents_path)
-    status_counts = count_download_statuses(raw_path)
-    if not raw_only:
-        print(f"[{fconvocatoria}] generando CSV largo", file=sys.stderr)
-        long_rows = write_long_csv(raw_path, long_path)
-        print(f"[{fconvocatoria}] generando CSV ancho", file=sys.stderr)
-        wide_rows = write_wide_csv(raw_path, wide_path)
-        print(f"[{fconvocatoria}] generando CSV completo mesas + CERA", file=sys.stderr)
-        complete_rows = write_complete_csv(
-            raw_path,
-            rausentes_raw_path if rausentes_raw_path.exists() else None,
-            complete_path,
-        )
-
-    manifest = {
-        "source": {
-            "home_page": "https://resultadoseleccionesandalucia.es/",
-            "api_base": BASE_URL,
-            "swagger_ui": f"{BASE_URL}/swagger-ui.html",
-            "api_docs": f"{BASE_URL}/api-docs",
-        },
-        "fetched_at": now_utc(),
-        "tconvocatoria": TCONVOCATORIA_AUTONOMICAS,
-        "fconvocatoria": fconvocatoria,
-        "counts": {
-            "mesas": len(contexts),
-            "download_statuses": status_counts,
-            "incidents": incident_rows,
-            "long_rows": long_rows,
-            "wide_rows": wide_rows,
-            "complete_rows": complete_rows,
-        },
-        "files": {
-            "raw_ndjson": str(raw_path),
-            "catalog_csv": str(catalog_path),
-            "long_csv": None if raw_only else str(long_path),
-            "wide_csv": None if raw_only else str(wide_path),
-            "complete_csv": None if raw_only else str(complete_path),
-            "incidents_csv": str(incidents_path),
-        },
-    }
-    write_json(manifest_path, manifest)
-    print(f"[{fconvocatoria}] listo: {manifest_path}", file=sys.stderr)
+                    handle.flush()
+                existing[identity] = record
+    if replacements:
+        replace_records(path, (existing[k] for k in sorted(existing, key=str)))
+    return existing
 
 
-def download_rausentes(
-    client: SielClient,
-    fconvocatoria: int,
-    output_dir: Path,
-    province_filter: set[int] | None,
-    raw_only: bool,
-    overwrite: bool,
-) -> dict[str, Any]:
-    raw_path = output_dir / "raw" / f"rausentes_{fconvocatoria}.ndjson"
-    long_path = output_dir / "processed" / f"rausentes_{fconvocatoria}_long.csv"
-    wide_path = output_dir / "processed" / f"rausentes_{fconvocatoria}_wide.csv"
-
-    if raw_path.exists() and not overwrite:
-        raise SystemExit(f"{raw_path} already exists. Use --overwrite to replace it.")
-
-    contexts = list(iter_rausentes_contexts(client, fconvocatoria, province_filter))
-    print(f"[{fconvocatoria}] descargando CERA/residentes ausentes ({len(contexts)} agregados)", file=sys.stderr)
-    raw_path.parent.mkdir(parents=True, exist_ok=True)
-    errors: list[dict[str, Any]] = []
-    with raw_path.open("w", encoding="utf-8") as handle:
-        for context in contexts:
-            try:
-                record = download_rausentes_record(client, context)
-            except SielApiError as exc:
-                errors.append({"context": context, "error": str(exc)})
-                record = unavailable_rausentes_record(client, context, exc)
-                print(f"[{fconvocatoria}] CERA marcado como no disponible para {context}: {exc}", file=sys.stderr)
-            handle.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
-
-    long_rows = None
-    wide_rows = None
-    status_counts = count_download_statuses(raw_path)
-    if not raw_only:
-        long_rows = write_rausentes_long_csv(raw_path, long_path)
-        wide_rows = write_rausentes_wide_csv(raw_path, wide_path)
-
-    return {
-        "counts": {
-            "agregados": len(contexts),
-            "downloaded": status_counts.get("ok", 0),
-            "failed": len(errors),
-            "download_statuses": status_counts,
-            "long_rows": long_rows,
-            "wide_rows": wide_rows,
-        },
-        "files": {
-            "raw_ndjson": str(raw_path),
-            "long_csv": None if raw_only else str(long_path),
-            "wide_csv": None if raw_only else str(wide_path),
-        },
-        "note": "La API SIEL expone residentes ausentes en agregado autonómico y provincial.",
-        "errors": errors,
-    }
-
-
-def build_complete_from_existing(output_dir: Path, fconvocatoria: int) -> dict[str, Any]:
-    mesas_path = output_dir / "raw" / f"mesas_{fconvocatoria}.ndjson"
-    catalog_path = output_dir / "processed" / f"mesas_{fconvocatoria}_catalog.csv"
-    rausentes_path = output_dir / "raw" / f"rausentes_{fconvocatoria}.ndjson"
-    complete_path = output_dir / "processed" / f"andalucia_{fconvocatoria}_completo.csv"
-    incidents_path = output_dir / "processed" / f"mesas_{fconvocatoria}_incidencias.csv"
-    if not mesas_path.exists():
-        raise SystemExit(f"No existe {mesas_path}. Descarga primero la convocatoria.")
-    raw_count = count_ndjson_records(mesas_path)
-    if catalog_path.exists():
-        catalog_count = len(read_catalog_csv(catalog_path))
-        if raw_count < catalog_count:
-            raise SystemExit(
-                f"Raw incompleto para {fconvocatoria}: {raw_count}/{catalog_count} mesas. "
-                "Ejecuta de nuevo con --resume antes de generar el CSV completo."
-            )
-
-    complete_rows = write_complete_csv(
-        mesas_path,
-        rausentes_path if rausentes_path.exists() else None,
-        complete_path,
-    )
+def export_convocatoria(output_dir: Path, election: int, raw_only: bool = False,
+                        include_cera: bool = True) -> dict[str, Any]:
+    mesas_path = find_raw_path(output_dir, f"mesas_{election}")
+    catalog_path = output_dir / "processed" / f"mesas_{election}_catalog.csv"
+    scope_path = output_dir / f"catalog_scope_{election}.json"
+    if not mesas_path.exists() or not catalog_path.exists():
+        raise ValueError("Se requieren raw y catálogo para verificar la cobertura; reanuda primero la descarga.")
+    contexts = read_catalog_csv(catalog_path)
+    expected = check_catalog(contexts, election)
+    records = unique_records(mesas_path, context_key, election)
+    if set(records) != expected:
+        raise ValueError(f"Raw incompleto o ajeno al catálogo: {len(expected - set(records))} ausentes, "
+                         f"{len(set(records) - expected)} ajenos. Reanuda antes de exportar.")
+    scope = json.loads(scope_path.read_text()) if scope_path.exists() else None
+    if scope and (scope.get("version") != 1 or scope.get("catalog_digest") != catalog_digest(contexts)
+                  or scope.get("fconvocatoria") != election or scope.get("tconvocatoria") != 5):
+        raise ValueError("El catálogo no coincide con sus metadatos; reanuda para actualizarlo.")
+    cera_path = find_raw_path(output_dir, f"rausentes_{election}") if include_cera else None
+    cera_records = unique_records(cera_path, cera_key, election) if cera_path and cera_path.exists() else {}
+    for record in cera_records.values():
+        ctx = record["context"]
+        if (ctx.get("ambito") not in {"cautonoma", "provincia"}
+                or (ctx["ambito"] == "provincia" and ctx.get("provincia_clave") is None)
+                or (ctx["ambito"] == "cautonoma" and ctx.get("provincia_clave") is not None)):
+            raise ValueError("El raw CERA contiene una identidad territorial inválida.")
+    provinces = {ctx["provincia_clave"] for ctx in contexts}
+    expected_provinces = set(scope.get("expected_provinces", [])) if scope else set()
+    actual_cera = {r["context"].get("provincia_clave") for r in cera_records.values()
+                   if r["context"].get("ambito") == "provincia"}
+    if actual_cera - (set(scope["provinces"]) if scope and scope.get("provinces") else expected_provinces or provinces):
+        raise ValueError("CERA fuera del ámbito del catálogo; usa una carpeta separada.")
+    coverage_complete = bool(scope and scope.get("enumeration_complete") and scope.get("provinces") is None
+                             and scope.get("limit_mesas") is None and len(expected_provinces) == 8
+                             and provinces == expected_provinces and actual_cera == expected_provinces)
+    suffix = "completo" if coverage_complete else "parcial"
+    complete_path = output_dir / "processed" / f"andalucia_{election}_{suffix}.csv"
+    incidents_path = output_dir / "processed" / f"mesas_{election}_incidencias.csv"
+    quality_path = output_dir / "processed" / f"calidad_{election}.csv"
     incident_rows = write_mesa_incidents_csv(mesas_path, incidents_path)
-    status_counts = count_download_statuses(mesas_path)
-    manifest_path = output_dir / f"manifest_{fconvocatoria}.json"
-    if manifest_path.exists():
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        manifest.setdefault("counts", {})["complete_rows"] = complete_rows
-        manifest.setdefault("counts", {})["download_statuses"] = status_counts
-        manifest.setdefault("counts", {})["incidents"] = incident_rows
-        manifest.setdefault("files", {})["complete_csv"] = str(complete_path)
-        manifest.setdefault("files", {})["incidents_csv"] = str(incidents_path)
-        write_json(manifest_path, manifest)
+    quality_counts = {}
+    with quality_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["tipo_registro", "clave", "estado_descarga", "estado_calidad", "incidencias_calidad"])
+        writer.writeheader()
+        for kind, items in (("mesa", records), ("cera", cera_records)):
+            for key, record in items.items():
+                quality = assess_record(record)
+                state = quality["estado_calidad"]
+                quality_counts[state] = quality_counts.get(state, 0) + 1
+                if state != "ok":
+                    writer.writerow({"tipo_registro": kind, "clave": json.dumps(key),
+                                     "estado_descarga": record.get("estado_descarga", "ok"), **quality})
+    files = {"raw_ndjson": str(mesas_path), "catalog_csv": str(catalog_path),
+             "incidents_csv": str(incidents_path), "quality_csv": str(quality_path)}
+    counts = {"mesas": len(records), "download_statuses": count_download_statuses(mesas_path),
+              "incidents": incident_rows, "quality_statuses": quality_counts}
+    for name in ("long", "wide"):
+        path = output_dir / "processed" / f"mesas_{election}_{name}.csv"
+        counts[f"{name}_rows"] = None if raw_only else (write_long_csv if name == "long" else write_wide_csv)(mesas_path, path)
+        files[f"{name}_csv"] = None if raw_only else str(path)
+    counts["complete_rows"] = None if raw_only else write_complete_csv(
+        mesas_path, cera_path if cera_records else None, complete_path)
+    files["complete_csv"] = None if raw_only else str(complete_path)
+    # Remove stale derived files with a misleading coverage suffix.
+    for name in ("completo", "parcial"):
+        stale = output_dir / "processed" / f"andalucia_{election}_{name}.csv"
+        if raw_only or stale != complete_path:
+            stale.unlink(missing_ok=True)
+    manifest_path = output_dir / f"manifest_{election}.json"
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    manifest.update({"source": {"home_page": "https://resultadoseleccionesandalucia.es/", "api_base": BASE_URL},
+                     "generated_at": now_utc(), "tconvocatoria": 5, "fconvocatoria": election,
+                     "scope": scope, "coverage_complete": coverage_complete,
+                     "include_cera": include_cera,
+                     "data_complete": coverage_complete and quality_counts.get("incompleto", 0) == 0,
+                     "quality_ok": quality_counts.get("incompleto", 0) + quality_counts.get("inconsistente", 0) == 0,
+                     "counts": counts, "files": files})
+    write_json(manifest_path, manifest)
+    return {"complete_rows": counts["complete_rows"], "complete_csv": files["complete_csv"],
+            "incident_rows": incident_rows, "incidents_csv": str(incidents_path),
+            "coverage_complete": coverage_complete, "download_statuses": counts["download_statuses"]}
 
-    return {
-        "complete_rows": complete_rows,
-        "complete_csv": str(complete_path),
-        "incident_rows": incident_rows,
-        "incidents_csv": str(incidents_path),
-        "download_statuses": status_counts,
-    }
+
+def download_convocatoria(client: SielClient, fconvocatoria: int, output_dir: Path,
+                         workers: int, province_filter: set[int] | None, limit: int | None,
+                         raw_only: bool, overwrite: bool, resume: bool,
+                         retry_failed: bool = False, compress_raw: bool = False,
+                         include_cera: bool = True, defer_export: bool = False) -> None:
+    raw_path = find_raw_path(output_dir, f"mesas_{fconvocatoria}", compress_raw)
+    catalog_path = output_dir / "processed" / f"mesas_{fconvocatoria}_catalog.csv"
+    scope_path = output_dir / f"catalog_scope_{fconvocatoria}.json"
+    if raw_path.exists() and not overwrite and not resume:
+        raise ValueError(f"{raw_path} ya existe. Usa --resume o --overwrite.")
+    requested = catalog_scope(fconvocatoria, province_filter, limit)
+    saved = json.loads(scope_path.read_text()) if scope_path.exists() else {}
+    reusable = resume and catalog_path.exists() and saved.get("enumeration_complete") and all(
+        saved.get(k) == value for k, value in requested.items())
+    contexts = read_catalog_csv(catalog_path) if reusable else None
+    if contexts is not None and saved.get("catalog_digest") != catalog_digest(contexts):
+        contexts = None
+    if contexts is None:
+        print(f"[{fconvocatoria}] enumerando el ámbito solicitado", file=sys.stderr)
+        contexts = sort_mesa_contexts(list(iter_mesa_contexts(client, fconvocatoria, province_filter, limit, workers)))
+        check_catalog(contexts, fconvocatoria)
+        # Validate existing identities before changing the catalog or scope.
+        existing = unique_records(raw_path, context_key, fconvocatoria) if resume else {}
+        if set(existing) - {context_key(ctx) for ctx in contexts}:
+            raise ValueError("El raw contiene mesas fuera del ámbito solicitado; usa otra carpeta.")
+        provinces = client.opciones("provincia", {"cautonoma": 1})
+        write_catalog_csv(catalog_path, contexts)
+        write_json(scope_path, {**requested, "enumeration_complete": True,
+                               "expected_provinces": sorted(int(p["clave"]) for p in provinces),
+                               "catalog_digest": catalog_digest(contexts), "created_at": now_utc()})
+    check_catalog(contexts, fconvocatoria)
+    update_raw(client, contexts, raw_path, fconvocatoria, context_key, download_mesa,
+               unavailable_mesa_record, workers, resume, overwrite, retry_failed)
+    if not defer_export:
+        export_convocatoria(output_dir, fconvocatoria, raw_only, include_cera)
+
+
+def download_rausentes(client: SielClient, fconvocatoria: int, output_dir: Path,
+                       province_filter: set[int] | None, raw_only: bool, overwrite: bool,
+                       resume: bool = False, retry_failed: bool = False,
+                       compress_raw: bool = False) -> dict[str, Any]:
+    path = find_raw_path(output_dir, f"rausentes_{fconvocatoria}", compress_raw)
+    if path.exists() and not overwrite and not resume:
+        raise ValueError(f"{path} ya existe. Usa --resume o --overwrite.")
+    contexts = list(iter_rausentes_contexts(client, fconvocatoria, province_filter))
+    records = update_raw(client, contexts, path, fconvocatoria, cera_key,
+                         download_rausentes_record, unavailable_rausentes_record,
+                         1, resume, overwrite, retry_failed)
+    files = {"raw_ndjson": str(path)}
+    for name, writer in (("long", write_rausentes_long_csv), ("wide", write_rausentes_wide_csv)):
+        target = output_dir / "processed" / f"rausentes_{fconvocatoria}_{name}.csv"
+        if not raw_only:
+            writer(path, target)
+        files[f"{name}_csv"] = None if raw_only else str(target)
+    statuses = count_download_statuses(path)
+    return {"counts": {"agregados": len(records), "downloaded": statuses.get("ok", 0),
+                       "failed": len(records) - statuses.get("ok", 0), "download_statuses": statuses},
+            "files": files, "note": "CERA agregado para Andalucía y sus provincias."}
+
+
+def build_complete_from_existing(output_dir: Path, fconvocatoria: int,
+                                 include_cera: bool = True) -> dict[str, Any]:
+    return export_convocatoria(output_dir, fconvocatoria, include_cera=include_cera)
 
 
 def parse_convocatorias(values: list[str] | None) -> list[int]:
@@ -1045,7 +1054,10 @@ def parse_convocatorias(values: list[str] | None) -> list[int]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Descarga resultados de mesas desde la API SIEL.")
     parser.add_argument("--list-convocatorias", action="store_true", help="Muestra las convocatorias disponibles y termina.")
-    parser.add_argument("--all", action="store_true", help="Descarga todas las autonómicas disponibles.")
+    parser.add_argument("--all", action="store_true", help="Selecciona todas las elecciones al Parlamento de Andalucía disponibles.")
+    parser.add_argument("--check", action="store_true", help="Comprueba agregados y una mesa por provincia, sin descarga masiva.")
+    parser.add_argument("--retry-failed", action="store_true", help="Con --resume, reintenta registros fallidos o incompletos.")
+    parser.add_argument("--compress-raw", action="store_true", help="Comprime nuevos raw como NDJSON gzip.")
     parser.add_argument("--convocatoria", action="append", help="Convocatoria a descargar, por ejemplo 202206. Se puede repetir o separar por comas.")
     parser.add_argument("--output", default="data", help="Directorio de salida. Por defecto: data")
     parser.add_argument("--workers", type=int, default=6, help="Descargas concurrentes de mesas. Por defecto: 6")
@@ -1059,7 +1071,9 @@ def main() -> int:
     parser.add_argument("--complete-only", action="store_true", help="Genera solo el CSV completo desde raw ya descargado.")
     parser.add_argument("--resume", action="store_true", help="Reanuda una descarga parcial de mesas ya existente.")
     parser.add_argument("--overwrite", action="store_true", help="Sobrescribe una descarga existente.")
-    parser.add_argument("--verify-tls", action="store_true", help="Fuerza verificación TLS estricta en la API de la Junta.")
+    tls = parser.add_mutually_exclusive_group()
+    tls.add_argument("--verify-tls", dest="verify_tls", action="store_true", default=True, help="Verifica certificados TLS (predeterminado).")
+    tls.add_argument("--insecure", dest="verify_tls", action="store_false", help="Desactiva explícitamente la verificación de certificados TLS.")
     args = parser.parse_args()
 
     if args.rausentes_only and args.skip_rausentes:
@@ -1068,6 +1082,18 @@ def main() -> int:
         parser.error("--complete-only no se puede combinar con --rausentes-only ni --raw-only")
     if args.resume and args.overwrite:
         parser.error("--resume y --overwrite son mutuamente excluyentes")
+
+    if args.all and args.convocatoria:
+        parser.error("--all y --convocatoria son mutuamente excluyentes")
+    if args.retry_failed and not args.resume:
+        parser.error("--retry-failed requiere --resume")
+    if args.workers < 1 or args.timeout <= 0 or args.retries < 0 or (args.limit_mesas is not None and args.limit_mesas < 1):
+        parser.error("workers, timeout y limit-mesas deben ser positivos; retries no puede ser negativo")
+    if args.complete_only and (args.province or args.limit_mesas or args.resume or args.overwrite or args.retry_failed):
+        parser.error("--complete-only utiliza el ámbito guardado; no admite filtros ni opciones de descarga")
+    if args.check and any((args.raw_only, args.rausentes_only, args.complete_only, args.resume,
+                           args.overwrite, args.retry_failed, args.limit_mesas, args.compress_raw)):
+        parser.error("--check no se puede combinar con opciones de descarga o reconstrucción")
 
     client = SielClient(verify_tls=args.verify_tls, timeout=args.timeout, retries=args.retries, pool_size=max(args.workers, 32))
     output_dir = Path(args.output)
@@ -1078,84 +1104,52 @@ def main() -> int:
         if args.list_convocatorias:
             list_convocatorias(client)
             return 0
-
-        save_source_metadata(client, output_dir)
-        if args.all:
-            convocatorias = [
-                int(item["clave"])
-                for item in client.opciones("fconvocatoria", {"tconvocatoria": TCONVOCATORIA_AUTONOMICAS})
-            ]
+        if args.all or (args.check and not args.convocatoria):
+            convocatorias = [int(item["clave"]) for item in client.opciones("fconvocatoria", {"tconvocatoria": 5})]
         else:
-            convocatorias = parse_convocatorias(args.convocatoria)
-
+            convocatorias = list(dict.fromkeys(parse_convocatorias(args.convocatoria)))
         if not convocatorias:
-            parser.error("usa --all, --convocatoria o --list-convocatorias")
-
+            parser.error("usa --all, --convocatoria, --check o --list-convocatorias")
         province_filter = set(args.province) if args.province else None
-        for fconvocatoria in convocatorias:
-            if args.complete_only:
-                result = build_complete_from_existing(output_dir, fconvocatoria)
-                print(
-                    f"[{fconvocatoria}] CSV completo generado: {result['complete_csv']} "
-                    f"({result['complete_rows']} filas; {result['incident_rows']} incidencias)",
-                    file=sys.stderr,
-                )
-                continue
-            partidos = client.opciones(
-                "partido/cautonoma",
-                {
-                    "cautonoma": CAUTONOMA_ANDALUCIA,
-                    "tconvocatoria": TCONVOCATORIA_AUTONOMICAS,
-                    "fconvocatoria": fconvocatoria,
-                },
-            )
-            write_json(output_dir / "raw" / "opciones" / f"partidos_{fconvocatoria}.json", partidos)
-            rausentes_manifest = None
+        if province_filter and not province_filter <= {4, 11, 14, 18, 21, 23, 29, 41}:
+            parser.error("--province debe ser un código INE de una provincia de Andalucía")
+        if args.check:
+            from check_siel import run_check
+            return run_check(client, convocatorias, output_dir, province_filter, not args.skip_rausentes)
+        if args.complete_only:
+            for election in convocatorias:
+                result = build_complete_from_existing(output_dir, election, not args.skip_rausentes)
+                print(f"[{election}] CSV generado: {result['complete_csv']} (cobertura completa: {result['coverage_complete']})", file=sys.stderr)
+            return 0
+        save_source_metadata(client, output_dir)
+        for election in convocatorias:
+            partidos = client.opciones("partido/cautonoma", {"cautonoma": 1, "tconvocatoria": 5, "fconvocatoria": election})
+            write_json(output_dir / "raw" / "opciones" / f"partidos_{election}.json", partidos)
+            if not args.rausentes_only:
+                download_convocatoria(client, election, output_dir, args.workers, province_filter,
+                                      args.limit_mesas, args.raw_only, args.overwrite, args.resume,
+                                      args.retry_failed, args.compress_raw, not args.skip_rausentes, defer_export=True)
+            cera_manifest = None
             if not args.skip_rausentes:
-                rausentes_manifest = download_rausentes(
-                    client=client,
-                    fconvocatoria=fconvocatoria,
-                    output_dir=output_dir,
-                    province_filter=province_filter,
-                    raw_only=args.raw_only,
-                    overwrite=args.overwrite or args.resume,
-                )
+                cera_manifest = download_rausentes(client, election, output_dir, province_filter,
+                                                   args.raw_only, args.overwrite, args.resume,
+                                                   args.retry_failed, args.compress_raw)
             if args.rausentes_only:
-                manifest_path = output_dir / f"manifest_{fconvocatoria}_rausentes.json"
-                write_json(
-                    manifest_path,
-                    {
-                        "source": {
-                            "home_page": "https://resultadoseleccionesandalucia.es/",
-                            "api_base": BASE_URL,
-                            "swagger_ui": f"{BASE_URL}/swagger-ui.html",
-                            "api_docs": f"{BASE_URL}/api-docs",
-                        },
-                        "fetched_at": now_utc(),
-                        "tconvocatoria": TCONVOCATORIA_AUTONOMICAS,
-                        "fconvocatoria": fconvocatoria,
-                        "rausentes": rausentes_manifest,
-                    },
-                )
-                continue
-            download_convocatoria(
-                client=client,
-                fconvocatoria=fconvocatoria,
-                output_dir=output_dir,
-                workers=args.workers,
-                province_filter=province_filter,
-                limit=args.limit_mesas,
-                raw_only=args.raw_only,
-                overwrite=args.overwrite,
-                resume=args.resume,
-            )
-            if rausentes_manifest:
-                manifest_path = output_dir / f"manifest_{fconvocatoria}.json"
-                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-                manifest["rausentes"] = rausentes_manifest
+                write_json(output_dir / f"manifest_{election}_rausentes.json",
+                           {"fconvocatoria": election, "fetched_at": now_utc(), "rausentes": cera_manifest})
+            if find_raw_path(output_dir, f"mesas_{election}").exists():
+                result = export_convocatoria(output_dir, election, args.raw_only, not args.skip_rausentes)
+                manifest_path = output_dir / f"manifest_{election}.json"
+                manifest = json.loads(manifest_path.read_text())
+                manifest["last_download_run_at"] = now_utc()
+                if cera_manifest:
+                    manifest["rausentes"] = cera_manifest
+                else:
+                    manifest.pop("rausentes", None)
                 write_json(manifest_path, manifest)
-    except SielApiError as exc:
-        print(f"Error consultando la API SIEL: {exc}", file=sys.stderr)
+                print(f"[{election}] listo: {manifest_path}; cobertura completa: {result['coverage_complete']}", file=sys.stderr)
+    except (SielApiError, ValueError, OSError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
         return 1
 
     return 0
