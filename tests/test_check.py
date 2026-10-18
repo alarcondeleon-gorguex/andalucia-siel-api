@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from check_siel import run_check
+from check_siel import compare_parties, run_check
 from test_downloader import record
 
 
@@ -48,6 +48,23 @@ class CheckClient:
 
 
 class CheckTests(unittest.TestCase):
+    def test_different_party_labels_are_not_silently_merged(self):
+        total = record()
+        province = copy.deepcopy(total)
+        province["escrutinio"]["votos"][0]["conjunto"] = "Otra etiqueta"
+        result = compare_parties(total, [province])
+        self.assertEqual(result["party_comparison"], "etiquetas_no_comparables")
+        self.assertEqual(result["party_differences"], {"Z": 3, "Otra etiqueta": -3})
+        self.assertEqual(province["escrutinio"]["votos"][0]["conjunto"], "Otra etiqueta")
+
+    def test_equal_labels_with_different_votes_are_numeric_inconsistency(self):
+        total = record()
+        province = copy.deepcopy(total)
+        province["escrutinio"]["votos"][0]["numvotos"] += 1
+        result = compare_parties(total, [province])
+        self.assertEqual(result["party_comparison"], "inconsistente")
+        self.assertEqual(result["party_differences"], {"Z": -1})
+
     def test_bounded_sample_falls_back_after_empty_historical_municipality(self):
         with tempfile.TemporaryDirectory() as t:
             client = CheckClient()

@@ -54,6 +54,13 @@ comprobación. El HTTP 500 conocido del CERA de 1982 queda identificado en el
 informe, sin provocar por sí solo un código de error. Un error general de conexión
 antes de obtener el catálogo puede impedir crear el informe.
 
+La conciliación de candidaturas compara sus etiquetas literales. Si la API
+utiliza siglas o nombres diferentes entre ámbitos, señala
+`etiquetas_no_comparables` y conserva las diferencias bajo sus nombres de origen.
+No fusiona candidaturas por suposición ni atribuye automáticamente esas variantes
+a votos perdidos. `issues_by_type` distingue estos casos de las inconsistencias
+numéricas y los datos incompletos.
+
 Las convocatorias se descubren automáticamente: no hay que añadir cada elección
 al código. El 18 de octubre de 2026 estaban disponibles 13, de `198205` a `202605`.
 

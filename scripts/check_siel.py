@@ -11,6 +11,21 @@ from download_mesas import (
 )
 
 
+def compare_parties(total: dict, provinces: list[dict]) -> dict:
+    def votes(records):
+        result = Counter()
+        for record in records:
+            for vote in record["escrutinio"].get("votos", []):
+                result[vote["conjunto"]] += vote["numvotos"]
+        return result
+    tv, pv = votes([total]), votes(provinces)
+    diffs = {k: tv[k] - pv[k] for k in tv.keys() | pv.keys() if tv[k] != pv[k]}
+    unmatched = sorted(k for k in tv.keys() ^ pv.keys() if tv[k] or pv[k])
+    status = "etiquetas_no_comparables" if diffs and unmatched else "inconsistente" if diffs else "ok"
+    return {"party_differences": diffs, "unmatched_party_labels": unmatched,
+            "party_comparison": status}
+
+
 def run_check(client: SielClient, elections: list[int], output_dir,
               province_filter: set[int] | None = None, include_cera: bool = True,
               request_budget: int = 1600) -> int:
@@ -41,6 +56,7 @@ def run_check(client: SielClient, elections: list[int], output_dir,
     provinces = [p for p in provinces if province_filter is None or int(p["clave"]) in province_filter]
     results = []
     errors = 0
+    issue_types: Counter = Counter()
     for election in elections:
         base = {"cautonoma": 1, "tconvocatoria": 5, "fconvocatoria": election}
         aggregates = []
@@ -66,6 +82,7 @@ def run_check(client: SielClient, elections: list[int], output_dir,
                     and record.get("errors") and all(e.get("status_code") == 500 for e in record["errors"]))
                 if record["estado_calidad"] != "ok" and not record["known_unavailable"]:
                     errors += 1
+                    issue_types["source_" + record["estado_calidad"]] += 1
                 aggregates.append(record)
         for province in provinces:
             params = {**base, "provincia": province["clave"]}
@@ -97,9 +114,11 @@ def run_check(client: SielClient, elections: list[int], output_dir,
                     raise SielApiError("No se encontró una mesa en los cinco municipios de prueba")
                 if found["estado_calidad"] != "ok":
                     errors += 1
+                    issue_types["source_" + found["estado_calidad"]] += 1
                 samples.append({"provincia": province, "skipped": skipped, "record": found})
             except SielApiError as exc:
                 errors += 1
+                issue_types["sample_unavailable"] += 1
                 samples.append({"provincia": province, "skipped": skipped, "error": str(exc)})
         reconciliation = []
         if province_filter is None and len(provinces) == 8:
@@ -116,23 +135,17 @@ def run_check(client: SielClient, elections: list[int], output_dir,
                         delta = total["resumen"][field] - sum(r["resumen"][field] for r in subs)
                         if delta:
                             diffs[field] = delta
-                def votes(records):
-                    result = Counter()
-                    for record in records:
-                        for v in record["escrutinio"].get("votos", []):
-                            result[v["conjunto"]] += v["numvotos"]
-                    return result
-                tv, pv = votes([total]), votes(subs)
-                party_diffs = {k: tv[k] - pv[k] for k in tv.keys() | pv.keys() if tv[k] != pv[k]}
-                if diffs or party_diffs:
+                parties = compare_parties(total, subs)
+                if diffs or parties["party_differences"]:
                     errors += 1
-                reconciliation.append({"cera": cera, "summary_differences": diffs, "party_differences": party_diffs})
+                    issue_types["territorial_summary" if diffs else parties["party_comparison"]] += 1
+                reconciliation.append({"cera": cera, "summary_differences": diffs, **parties})
         results.append({"fconvocatoria": election, "aggregates": aggregates,
                         "samples": samples, "reconciliation": reconciliation})
-        print(f"[{election}] comprobados {len(aggregates)} agregados y {sum('record' in s for s in samples)} mesas")
+        print(f"[{election}] comprobados {len(aggregates)} agregados y {sum('record' in s for s in samples)} mesas", flush=True)
     report = {"checked_at": now_utc(), "api_base": client.base_url, "tls_verified": client.verify_tls,
               "queries": calls, "request_budget": request_budget, "elections": elections,
-              "issues": errors, "results": results,
+              "issues": errors, "issues_by_type": dict(issue_types), "results": results,
               "coverage_complete": False,
               "note": "Muestra acotada; no certifica todas las mesas. CERA 1982 HTTP 500 se identifica como ausencia conocida."}
     path = output_dir / "check_siel.json"
