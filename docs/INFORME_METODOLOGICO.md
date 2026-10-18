@@ -1,0 +1,1 @@
+docs/INFORME_METODOLOGICO.md
