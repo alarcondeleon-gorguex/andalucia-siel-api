@@ -1,4 +1,4 @@
-docs/INFORME_METODOLOGICO.md
+docs/INFORME_METODOLOGICO.md add electoral methodology report and decision trees
 # Sistema Integral de Metodología Electoral y Análisis Censal (Málaga)
 
 ## 1. Árboles Estructurales y de Decisión Metodológica
